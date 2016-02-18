@@ -840,6 +840,874 @@ animations：将改变视图属性的代码放在这个block中
 completion：动画结束后，会自动调用这个block
 ```
 
+```
+网易彩票Demo
+1. 类似于QQ那种主流框架，项目的起点都是tabbar控制器，导航控制器，自定义tabbar开始(继承UIView)
+2. 再系统自带的tabbar里面添加自定义的Mytabbar,大师特别注意的是 要在viewWillAppear 方法里面，遍历系统自带的tabbar。 删掉UITabbarButton (继承自UIControl)
+3. 控制器父类的抽取，self继承注意点，子类的各有特色
+4. 宏的引用
+#define JNUserDefaults [NSUserDefaults standardUserDefaults]
+// 加载json 对象
+#define ILJson(name) [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@#name withExtension:nil]] options:NSJSONReadingAllowFragments error:nil]
+5. 抽取存储的工具类，内部封装存取的两个方法. 注意self.title 作为key的妙用
+6. 应用的操作(打电话，发短信，打开iTunes 等)
+7. CollectionViewController
+* 必须要有流水布局，重写init方法，从内部拦截设置流水布局
+- (id)init
+{
+    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
+    if (self =[super initWithCollectionViewLayout:layout]) {
+        layout.itemSize = CGSizeMake(80, 80);// 拿到布局很重要，可以设置很多属性
+        layout.minimumInteritemSpacing = 10; // 水平方向的间距
+        layout.minimumLineSpacing = 10;  // 垂直方向的间距
+        layout.sectionInset = UIEdgeInsetsMake(20, 0, 0, 0);
+    }
+    return self;
+}
+* 注册代码cell [self.collectionView registerClass:[JNProductCell class] forCellWithReuseIdentifier:reuseIdentifier]
+* 注册xib加载的cell [self.collectionView registerNib:nib forCellWithReuseIdentifier:JNProductCellID];
+* 小坑：collectionView默认是cell 个数超出了范围才会滚动，但是如果不够，下拉刷新的情况下，设置self.collectionView.alwaysBounceHorizontal = YES 就可以了
+```
+
+```
+Core Fundation : 基于c语言的一套框架
+> Core Fundation 中的数据类型一般和Fundation 都是可以互相转换的，这里用到桥接转换(不同框架之间架起一个桥梁,类似于强制类型转换，只不过要加上__bridge 表示不同框架的类型转换)
+NSString *str = @"haha";
+CFStringRef str2 = (__bridge CFStringRef)str;
+NSString *str3 = (__bridge NSString*)str2;
+> Core Fundation 中的数据类型创建(含有creat,copy,new)一般都要自己手动释放CFRelease();
+/** 桥接总结：
+* Foundation 和 Core  Foundation 相互转换. 桥接
+* 以后在使用C语言的函数时, 只要函数名称包含creat/copy/retain 就必须自己手动释放CFRelease，因为c语言的东西不归OC的ARC管理
+* 桥接转换再MRC情况下： 直接强制转换
+* CFStringRef strC = (CFStringRef)strOC;
+* NSString *strOC = ( NSString *)strC;
+*
+* 桥接转换再MRC情况下： 桥接转换  __bridge / __bridge_retained / __bridge_transfer
+* __bridge : CFStringRef strC = (__bridge CFStringRef)strOC
+> 不会转移对象的所有权，意味着strOC 释放不能用了，strC就不能用
+* __bridge_retained: CFStringRef strC = (__bridge_retained CFStringRef)strOC;
+> 会转移对象的所有权，意味着strOC 释放了，strC 还能用，
+> 但是注意，虽然能用，strC 必须要手动释放，c语言的东西不归arc 管理，需要自己释放
+> CFStringRef strC = CFBridgingRetain(strOC);// retain 给你了，表明strC持有拥有权，内存归自己管理要自己手动释放
+* __bridge_transfer: NSString *strOC = (__bridge_transfer NSString *)strC;
+> C-->OC:它会将对象的所有权转移给strOC, 也就是说, 即便strC被释放了, strOC也可以使用
+> 他会自动释放strC, 也就是以后我们不用手动释放strC
+> NSString *strOC = CFBridgingRelease(strC); // 转换给你，我会自动释放
+*
+*/
+```
+
+```
+static 关键字作用
+*  static 修饰全局变量
+>  会让这个全局变量只在当前的这个文件中能使用，其他文件不能使用。
+>  举例： 单例static ，只在类的.m 文件中声明，别的文件中不能使用修改我的全局变量,如果不加static，那么别人可以拿到我全局变量修改，这样的话就失去了单例的意义
+*  static 修饰局部变量
+>  修饰局部变量 :
+>  局部变量的生命周期 跟 全局变量 类似,但是不能改变作用域
+>  能保证局部变量永远只初始化1次，在程序运行过程中，永远只有1分内存
+>  举例： tableview cell 重用中，修饰了局部的ID 变量，这样保证这个ID 只初始化一次，只有一次内存
+```
+
+```
+extern关键字
+> extern 是 C/C++语言中表明函数和全局变量作用范围（可见性）的关键字，该关键字告诉编译器，
+其声明的函数和变量可以在本模块或 其它模块中使用。
+```
+
+```
+图片的加载：
+[UIImage imageNamed:@"home"];  加载png图片
+
+一、非retina屏幕
+1、3.5 inch（320 x 480）
+* home.png
+
+二、retina屏幕
+1、3.5 inch（640 x 960）
+* home@2x.png
+
+2、4.0 inch（640 x 1136）
+* home-568h@2x.png（如果home是程序的启动图片，才支持自动加载）
+
+三、举例（以下情况都是系统自动加载）
+1、home是启动图片
+* iPhone 1\3G\3GS -- 3.5 inch 非retina ：home.png
+* iPhone 4\4S -- 3.5 inch retina ：home@2x.png
+* iPhone 5\5S\5C -- 4.0 inch retina ：home-568h@2x.png
+
+2、home不是启动图片
+* iPhone 1\3G\3GS -- 3.5 inch 非retina ：home.png
+* iPhone 4\4S -- 3.5 inch retina ：home@2x.png
+* iPhone 5\5S\5C -- 4.0 inch retina ：home@2x.png
+
+3、总结
+* home.png ：3.5 inch 非retina
+* home@2x.png ：retina
+* home-568h@2x.png ：4.0 inch retina + 启动图片
+
+```
 
 
+```
+创建了一个控件，就是看不见
+1.当前控件没有添加到父控件中
+2.当前控件的hidden = YES
+3.当前控件的alpha <= 0.01
+4.没有设置尺寸（frame.size、bounds.size）
+5.位置不对（当前控件显示到窗口以外的区域）
+6.背景色是clearColor
+7.当前控件被其他可见的控件挡住了
+8.当前控件是个显示图片的控件（没有设置图片\图片不存在，比如UIImageView）
+9.当前控件是个显示文字的控件（没有设置文字\文字颜色跟后面的背景色一样，比如UILabel、UIButton）
+10.检查父控件的前9种情况
 
+一个控件能看见，但是点击后没有任何反应：
+1.当前控件的userInteractionEnabled = NO
+2.当前控件的enabled = NO
+3.当前控件不在父控件的边框范围内
+4.当前控件被一个背景色是clearColor的控件挡住了
+5.检查父控件的前4种情况
+6.。。。。。。
+文本输入框没有在主窗口上：文本输入框的文字无法输入
+```
+
+```
+父子控制器的问题 
+* 如果发现：控制器的view还在，但是view上面的数据不显示，极大可能是因为：控制器被提前销毁了
+* 一个控制器的view是可以随意调整尺寸和位置的
+* 一个控制器的view是可以随意添加到其他view中
+* 如果将一个控制器的view，添加到其他view中显示，那么要想办法保证控制器不被销毁
+* 原则：只要view在，view所在的控制器必须得在，这样才能保证view内部的数据和业务逻辑正常
+* 方案： self.childViewControllers(属性强引用着，并且并且，添加的控制器成为了self 的子控制器) [self addChildViewController:]
+* 规范： 如果两个控制器的互为父子关系，那么，控制器的view 一定要是父子关系，不然父子控制器之间的交互会受很大的影响(监听屏幕旋转等(如果子控制器的view 显示在了父控制器的view上面，那么子控制器就能监听到父控制器的屏幕旋转,没有显示子控制器view的不会通知))
+```
+
+```
+const的用法: 看const 修饰的是什么 
+* const int age = 10; // 表示age只读并且不能修改
+* int const age = 10; // 和上面的一样
+* const NSString *name = @"tom"; *name是只读，不能修改,，但name指针可以修改
+* NSString *const name = @"tom"; name指针只读，不能修改，一般用这一个来修饰一些常量，指针指向的数是可以修改的，但指针是不可修改的
+* 用法 再JNConst.h 声明, .m文件实现
+> UIKIT_EXTERN const CGFloat JNHeight
+> const CGFloat JNHeight = 1.65;
+> 在一个函数声明中，const 可以修饰形参，表明它是一个输入参数，在函数内部不能改变其值；
+> 对于类的成员函数，若指定其为 const 类型，则表明其是一个常函数，不能修改类的成员变量；
+```
+
+```
+/** lazy init */
+-(UILabel *)msgLabel
+{
+    if (!_msgLabel) {
+    _msgLabel = ({
+        UILabel *msgLabel = [UILabel new];
+        msgLabel.textAlignment = NSTextAlignmentCenter;
+        msgLabel;
+        });
+    }
+    return _msgLabel;
+}
+
+```
+
+```
+小技巧
+1.自定义了leftBarbuttonItem左滑返回手势失效了怎么办?
+self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithImage:img style:UIBarButtonItemStylePlain target:self action:@selector(onBack:)];
+self.navigationController.interactivePopGestureRecognizer.delegate = (id<UIGestureRecognizerDelegate>
+
+2.TableView不显示没内容的Cell怎么办?
+self.tableView.tableFooterView = [[UIView alloc] init];
+
+3.ScrollView莫名其妙不能在viewController划到顶怎么办?
+self.automaticallyAdjustsScrollViewInsets = NO;
+
+4.键盘事件写的好烦躁,使用IQKeyboardManager(github上可搜索)
+5.app滑动流畅 KMCGeigerCounter
+
+6怎么在不新建一个Cell的情况下调整separaLine的位置?
+_myTableView.separatorInset = UIEdgeInsetsMake(0, 100, 0, 0);
+
+7.导航条返回键带的title太讨厌了,怎么让它消失!
+
+[[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -60) forBarMetrics:UIBarMetricsDefault];
+
+8.CoreData--> MagicalRecord
+
+9.CollectionView 怎么实现tableview那种悬停的header?
+CSStickyHeaderFlowLayout
+```
+
+```
+新浪微博项目总结
+
+1.授权
+> 第一步（利用webView 加载 授权页面）
+*  URL：https://api.weibo.com/oauth2/authorize
+请求参数：
+* client_id：申请应用时分配的AppKey
+* redirect_uri：授权成功后的回调地址
+> 第二步（webView 代理方法中，拦截回调页面的加载，截取毁掉地址后面的code码。那其实就是requestToken(code)）
+> 第三步：发送请求，获取AccessToken
+* URL：https://api.weibo.com/oauth2/access_token
+* 请求参数：
+* client_id：申请应用时分配的AppKey
+* client_secret：申请应用时分配的AppSecret
+* grant_type： 填写 authorization_code
+* redirect_uri：授权成功后的回调地址
+* code：授权成功后返回的requestToken（截串的code）
+
+2. 工具类的使用
+> 加载表情的一些操作不应该再控制器中完成，要避免给予控制器的压力，这个时候应该抽取工具类来专门的加载表情
+> 表情info。plist的加载，注意，当文件托在项目中，Xcode默认生成的是虚拟文件夹，如果遇到相同的文件名，再不同的文件夹中，应该creat foler reference,这个时候文件再bundle 中就是以文件夹的目录情况显示
+>   因为这是一个类方法，不是面向对象的方法。所以不能够通过self.recent 拿到这个数组,保证内存中只有一个数组，因为没必要每次都创建或者访问
+
+static NSMutableArray *_recent; // 因为这是一个类，不是实力变量，不能通过self.recent 来获取成员变量，面向的是类方法，而不是对象方法。这个时候考虑到这样写法。同时也保证了内存中只有这一个对象，每次修改我都保存了
++(void)initialize  //  当使用到这个类的时候就会调用一次,再这里进行懒加载，牛逼
+{
+    _recent = [NSKeyedUnarchiver unarchiveObjectWithFile:JNEmotionFilePath];
+    if (_recent == nil) {
+        _recent = [NSMutableArray array];
+    }
+}
+
+* 数组遍历删除问题
+* 最好不要再遍历数组的的同时删除数组的元素，因为，遍历数组时刻依赖着数组的个数，而个数影响着次数，所以即使要遍历删除，应该要时刻监听着数组个个数，for 循环应该写arr.count(保证每次都能拿到准确的数组格式)
+* removeObject 内部会调用isEquall 的方法，来判断你要删除的数组元素和我数组里面的对象是否是同一个对象，是同一个对象的话我才给你删除，但是有时候不一定要删除的是同一个对象，你数组元素和我数组元素数组相同(emotion情况)的特殊需求我也要删除，这个时候考虑到重写对象的isEquall 的方法
+
+-(BOOL)isEqual:(JNEmotion *)e
+{
+    [super isEqual:e];
+// 改变系统自带的判断方法 isEqualToString 判断的是内容， == 判断的是否是同一个对象
+    return [self.chs isEqualToString:e.chs] || [self.code isEqualToString:e.code];
+}
+
+> 存储数据一般都使用工具类封装起来,再内部实现存和取的方法，统一管理。
+* MJCodingImplementation 内部实现了存取的code 方法.内部的原理是利用runtime 来获取ivarlist 列表，然后遍历做一些归档解档的操作
+
+> 网络请求的工具类，为了避免项目对框架的依赖，自己再套一层外套 (注意block 做回调参数的写法)
++ (void)get:(NSString *)url parames:(NSDictionary *)parame  success:(void(^)(id responseObj))success failure:(void(^)(NSError *error))failure;
+> 但是大多数情况下，如果在控制器中利用HTTPTool工具类发送网络请求，控制器还是知道了太多了，而且也应该面向模型开发。这个时候，应该在抽取一个业务类。业务类专门做自己的业务。项目的层次结构性强、
+
+3.良好的见哦按交互体验应该在viewDidAppear 方法里面弹出键盘 viewWillDisappear 退出键盘，如果在viewDidload 里面，或造成一些卡的情况，因为在加载键盘造成卡顿
+* 键盘处理，监听键盘的通知
+* self.textView.inputAccessoryView  // inputAccessoryView是工具条.
+* self.textView.inputView  是键盘 // 自定义键盘
+* 键盘的切换。 根据self.textView.inputView == nil 来判断键盘是系统自带的还是自定义键盘.
+
+if (self.textView.inputView == nil) { // 用的是系统自带的键盘
+    self.toolbar.showKeyboard = YES;
+    self.textView.inputView = self.emotionKeyboard;
+}else{ // 已经是表情键盘了
+    self.textView.inputView = nil; // 清空，方便下次判断
+    self.toolbar.showKeyboard = NO;
+}
+[self.textView endEditing:YES];
+#warning 更换了系统自带的键盘，那么必须要退出键盘之后再重新叫出键盘,不然键盘不显示
+// 延迟0.1s 左动画
+dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    [self.textView becomeFirstResponder]; // 键盘的弹出动画。
+});
+
+*  BOOL 的巧妙应用可是实现加锁的情况，再特殊的情况代码前后置 YES 和 NO, 再判断的地方做YES 或者NO 的return 操作.
+* [self.textView deleteBackward]; // 系统自带的删除功能，会在光标后面删除
+* [self insertText:string]; 会自动再光标后面凭借字符(emoji本质是字符串)
+
+*  调用系统自带的 相册，相机，因为代码很相似，可以考虑将sourceType抽取出来，打开不同的情况
+
+```
+
+```objc
+-(void)openCamera
+{
+    // 判断是否支持照相功能（只有真机才能打开相机，不然会crash）
+    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])  return; // 不支持那么直接返回
+    #warning 如果觉得每次选图片都只能选一张，可以用collectionView来实现多选，通过assetsFramework 框架能拿到系统的图片url
+    JNPhotoController *photoVC = [[JNPhotoController alloc]init];
+    photoVC.sourceType = UIImagePickerControllerSourceTypeCamera;
+    photoVC.allowsEditing = YES;
+    photoVC.delegate = self;
+    self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    [self presentViewController:photoVC animated:YES completion:nil];
+}
+
+```
+
+**弹出菜单的动画**
+```objc
+-(void)makeOpen
+{
+    // 每隔按钮隔0.1秒做动画
+    [self.menubtns enumerateObjectsUsingBlock:^(JNComposeMenuButton *btn, NSUInteger idx, BOOL *stop) {
+            [UIView animateWithDuration:0.5 delay:0.05 * idx usingSpringWithDamping:0.7 initialSpringVelocity:0 options:UIViewAnimationOptionCurveLinear animations:^{
+            btn.y -= 300;
+        } completion:^(BOOL finished) {
+        }];
+    }];
+}
+
+```
+
+**版本新特性的判断 : 拿到上次的版本号于当前的版本号相比较，不同就显示新特性**
+```objc
++(void)chooseController
+{
+    // 版本号的key
+    NSString *versionKey = (__bridge NSString*)kCFBundleVersionKey;
+
+    // 取出上次的版本号
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *lastVersion = [defaults objectForKey:versionKey];
+
+    // 取出当前版本号
+    NSString *currentVersion = [NSBundle mainBundle].infoDictionary[versionKey];
+
+    // 取出window
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+
+    // 判断 。版本号不相同就显示新版本
+    if (![lastVersion isEqualToString:currentVersion]) { // 不相同
+    window.rootViewController = [[JNNewFeatureController alloc]init];
+    }else{ // 相同,微博界面
+    window.rootViewController = [[JNTabbarController alloc]init];
+}
+    // 存储版本号
+    [defaults setObject:currentVersion forKey:versionKey];
+    [defaults synchronize]; // 同步
+}
+
+```
+
+
+```
+坐标系转换： 最重要的是找准坐标系的坐标原点 bounds 是以自己的左上角为原点，自身就是一个坐标系。不用bounds 那么就要有superView
+```
+
+**拦截代理的setter方法，有代理才做事情**
+```objc
+- (void)setDelegate:(id<JNEmotionBarDelegate>)delegate
+{
+    _delegate = delegate;
+    #warning 刚创建时候self 的代理为为空，所以再setdelegate 里面拦截，有代理我才选中
+    [self btnClick:self.defaultButton];
+}
+
+```
+
+**系统的自动渲染**
+```objc
+UIImage *img = [UIImage imageNamed:emotion.png];
+img = [img imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] // 系统会自动渲染成蓝色的，所以不需要渲染，总是保持原生的
+
+```
+
+```
+* 避免控件之间的循环引用, 不用的隐藏，用的显示，有YES一定要有NO
+#warning 避免循环引用的出现还有一个比较好的方案是告诉模型，是否显示或者隐藏，然后刷新数据（MVC 通过模型来修改界面）
+self.check.hidden = !self.deal.isChecking(再setdeal 方法里->内部掉刷新cell 的界面)
+
+self.deal.checking = !self.deal.isChecking
+self.check.hidden = !self.check.hidden
+
+* 如果你自定义系统自带的控件，例如titleView,即便你设置了xy,依然会被系统自带的覆盖，但是你一定要设置宽高，不然没有尺寸、显示不出来
+* get方法与set方法拦截的选择。 如果重写了get方法，意味着在外面每次获取都会来到get方法。这样保证了数据的实时更新，但是，每次都来都get方法，会怎加一些不必要的开支，而如果进行set方法拦截的话，优势在于不必平凡的调用，只计算一次，但是不能保证实时的一些更新操作
+```
+
+```
+日期
+> 设置日期格式（声明字符串里面每个数字和单词的含义）
+> E:星期几  M:月份 d:几号(这个月的第几天)  H:24小时制的小时  m:分钟  s:秒  y:年
+> NSLocale *locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
+fmt.locale = locale; // 如果是真机调试，转换这种欧美时间，需要设置locale
+> 日历对象
+NSCalendar *calendar = [NSCalendar currentCalendar]; // 一定要是current。获取当前的日历对象
+// 表明要获取那个时间段的差值
+NSCalendarUnit unit = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay |NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
+NSDateComponents *cmps =  [calendar components:unit fromDate:creatDate toDate:now options:0]; // from 与to 两个位置随便写。 option 写0
+
+```
+
+** 通知 后台**
+```objc
+iOS8开始,对用户的隐私的加强，需要注册配置信息
+if ([[UIDevice currentDevice].systemVersion floatValue] > 8.0 ) { // iOS8
+    UIUserNotificationSettings *setting = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeBadge categories:nil];
+    [application registerUserNotificationSettings:setting];
+}
+
+* 后台处理
+// 开启后台任务
+__block UIBackgroundTaskIdentifier taskID = [application beginBackgroundTaskWithExpirationHandler:^{ 
+    // 过期就停止
+    [application endBackgroundTask:taskID];
+}];
+
+app的状态
+1.死亡状态：没有打开app
+2.前台运行状态
+3.后台暂停状态：停止一切动画、定时器、多媒体、联网操作，很难再作其他操作
+4.后台运行状态
+
+* 后台任务总结
+1.在代理的applicationDidEnterBackground 方法中写开启后台任务，返回任务ID
+2.配置plist文件添加Required background modes，
+3.string里面添加 App plays audio or streams audio/video using AirPlay
+在Info.plst中设置后台模式：Required background modes == App plays audio or streams audio/video using AirPlay 搞一个0kb的MP3文件，没有声音
+循环播放
+以前的后台模式只有3种:1.保持网络连接 2.多媒体应用 3.VOIP:网络电话
+```
+
+```
+bool 类型和set方法联合使用
+再外面设置情况，重写set方法，再里面setter方法拦截，因为这时候在里面bool已经有值，根据不同的bool 类型的值。有对应的情况
+```
+
+```
+ 遍历scrollView 内部子控件可以发现，自带了两个view，这两个view 是系统自带的水平垂直滚动条。计算尺寸不方便，所以当对应的属性设置为no 的时候，那么scrollView 的子控件就没有这两个多余的滚动条了
+```
+
+```
+分页小算法
+NSUInteger count = (emotions.count + JNPageEmotionCount - 1) / JNPageEmotionCount; // JNPageEmotionCount == 20
+```
+
+```
+有的时候，我们会利用touch 来监听点击，但是这种情况下，点击事件会被子控件吞掉。所以不是太可靠。可以通过长按手势来做到只监听自己的触摸，而不监听子控件的触摸事件
+```
+
+```
+取消emoji 显示时系统自带动画，但是这是系统的动画，一旦取消了。整个西东的动画行为就会取消，所以应该立马设置回去
+```
+
+```objc
+UIView setAnimationsEnabled:NO];
+// DO WHAT U WANNA DO
+dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    [UIView setAnimationsEnabled:YES]; // 代码一过掉，马上恢复动画
+});
+* 注意，dispatch_after 是延迟提交，并不是延迟运行
+Enqueue，就是入队，指的就是将一个Block在特定的延时以后，加入到指定的队列中，不是在特定的时间后立即运行，dispatch_after只是延时提交block，并不是延时后立即执行。所以想用dispatch_after精确控制运行状态的朋友可要注意了
+```
+
+```
+设置attach 的属性
+CGFloat fontWH = self.font.lineHeight; // 字体的行高
+NSAttributedString ,NSTextAttachment 附件对象attach的bounds的xy可以设置。字体的行高 font.lineHeight
+```
+
+```
+性能优化
+1. 用ARC管理内存
+2. 在正确的地方使用reuseIdentifier
+3. 尽可能使Views不透明
+4. 避免庞大的XIB
+5. 不要block主线程
+6. 在Image Views中调整图片大小
+7. 选择正确的Collection
+8. 打开gzip压缩
+中级（这些是你可能在一些相对复杂情况下可能用到的）
+9. 重用和延迟加载Views
+10. Cache, Cache, 还是Cache！
+11. 权衡渲染方法
+12. 处理内存警告
+13. 重用大开销的对象
+14. 使用Sprite Sheets
+15. 避免反复处理数据
+16. 选择正确的数据格式
+17. 正确地设定Background Images
+18. 减少使用Web特性
+19. 设定Shadow Path
+20. 优化你的Table View
+21. 选择正确的数据存储选项
+进阶级（这些建议只应该在你确信他们可以解决问题和得心应手的情况下采用）
+22. 加速启动时间
+23. 使用Autorelease Pool
+24. 选择是否缓存图片
+25. 尽量避免日期格式转换
+```
+
+```
+静态库的制作
+->static libary ->写一些核心代码-->找到.a 文件，真机模拟器分别build一次->showinFinder -->打包资源(bundle)
+如果没有暴露头文件的解放方法：build pharse ->copy files
+
+* 真机文件夹下得静态库只能用于真机上, 模拟器文件夹下得静态库只能用于模拟器下
+
+* 可以借助 lipo -info 静态库文件地址 指令查看当前静态库支持的平台
+* 可以借助 lipo -create libdev/lib08-staticDemo.a  libPro/lib08-staticDemo.a  -output HMTool.a 指令将模拟器和真机的静态库合并为一个静态库
+* lipo -create 需要合并的静态库1 需要合并的静态库2 -output 合并之后的文件名称
+* Xcode6之后自动导入框架，但是如果用.a静态库的话，那么必须要导入
+注意: 虽然将真机和模拟器的静态库合并在一起之后, 以后我们就不用关心当前是允许在模拟器还是真机了, 但是如果在程序发布时还是建议大家使用真机的静态库. 小
+lipo -create libsim/libJNTool.a libdev/libJNTool.a -output JNXIXI.a
+
+```
+
+
+```
+*  正则表达式使用步骤
+*  1.创建正则表达式对象：定义规则（正则表达式）(贪婪匹配)
+*  2.利用正则表达式匹配
+
+* 常见字符含义
+.	匹配除换行符以外的任意字符
+\w	匹配字母或数字或下划线或汉字
+\s	匹配任意的空白符
+\d	匹配数字
+\b	匹配单词的开始或结束
+^	匹配字符串的开始
+$	匹配字符串的结束
+*	重复零次或更多次
++	重复一次或更多次
+?	重复零次或一次
+{n}	重复n次
+{n,}	重复n次或更多次
+{n,m}	重复n到m次
+```
+
+```
+缓存逻辑
+* 首先从本地缓存加载
+* 本地没有数据再去进入下拉刷新状态   加载服务器端数据
+* 否则不加载服务器数据  只让 用户主动加载数据
+```
+
+```
+image Mode
+> UIViewContentModeScaleToFill : 图片拉伸至填充整个UIImageView（图片可能会变形）
+> UIViewContentModeScaleAspectFit : 图片拉伸至完全显示在UIImageView里面为止（图片不会变形）
+
+> UIViewContentModeScaleAspectFill:图片拉伸至 图片的宽度等于UIImageView的宽度 或者 图片的高度等于UIImageView的高度 为止
+> UIViewContentModeRedraw : 调用了setNeedsDisplay方法时，就会将图片重新渲染
+1.凡是带有Scale单词的，图片都会拉伸
+2.凡是带有Aspect单词的，图片都会保持原来的宽高比，图片不会变形
+```
+
+```
+性能测试(性能分析，内存分析)
+1.静态分析(Anaylize)
+* 检测代码是否有潜在的内存泄露
+* 编译器觉得不太合适的代码(32位，64位的适配问题)
+
+2.动态分析(profile-instrument)
+* 检测程序再运行过程中的内存变化
+* allocations：能看清楚app的内存分配情况
+* leaks ：能看清楚app再何时产生内存泄露(有红色的代表有内存泄露，注意官方webView就有内存泄露)
+* timeprofile 表示程序的运行时间分析（耗时间的操作，算法的优化）
+内存泄露：改释放的对象没有被释放
+内存溢出：内存爆了，不够用
+
+注意点：APNs限制了每个notification的payload最大长度是256字节，超长的消息是不能发送的
+
+预编译指令
+c 提供的预处理功能主要有以下三种： 1 ）宏定义　 2 ）文件包含　 3 ）条件编译
+```
+
+```
+Autoreleasepool的工作原理
+Autorelease的对象是在什么时候被release的？
+> autorelease实际上只是把对release的调用延迟了，对于每一个Autorelease，系统只是把该Object放入了当前的Autorelease pool中，当该pool被释放时，该pool中的所有Object会被调用Release。对于每一个Runloop， 系统会隐式创建一个Autorelease pool，这样所有的release pool会构成一个象CallStack一样的一个栈式结构，在每一个Runloop结束时，当前栈顶的Autorelease pool会被销毁，这样这个pool里的每个Object（就是autorelease的对象）会被release。那什么是一个Runloop呢？ 一个UI事件，Timer call， delegate call， 都会是一个新的Runloop。那什么是一个Runloop呢？ 一个UI事件，Timer call， delegate call， 都会是一个新的Runloop。
+
+> 在线程方法内不创建线程池，会在控制台有警告。系统认为分线程是独立运行，需要有一个独立的 NSAutoreleasePool
+> 为了对pool内部的一些局部变量的释放，避免引起内存泄露
+```
+
+```
+分类的作用 
+1 可以使本来需要在.h中声明的方法放到.m文件中声明，使方法变成私有。
+2 可以扩展或覆盖一个类的功能，包括系统类，维护了代码原本的结构不受影响。
+3 可以分散代码到不同的文件之中，比如系统类库里有一个NSObject的类别，并没有写在NSObject类里，而写到另外一个类里，主要是因为这个类别扩展的功能跟那个类相关，便于将来查看。(利于团队协作，分模块开发)
+```
+
+```
+copy */
+* 需要遵守NSCopying的协议，调用copy方法，内部会调用copywithZone 方法
+- (id)copyWithZone:(NSZone *)zone {
+    MyObject *copy = [[[self class] allocWithZone: zone] init];
+    copy.username = [self.username copyWithZone:zone];
+    return copy;
+}
+示例：NSString *str1 = @"111",NSString *str2 = @"111"
+> 这种创建对象方式会造成内存地址共享，s1和s2完全指向同一个地址空间，也就是同一个对象了，改变或释放这个地址空间的内容就意味着s1和s2都变了。为了避免修改一方影响到另外一方，字符串赋值时常copy一个新的对象比较安全。
+```
+
+```
+1. 取支付宝官网申请“开通支付宝视同权限”
+* 填写个人信息\公司信息(绝对真实，可靠，不是随便给你用的)
+* 签约
+* 等待审核
+
+2.审核通过
+* seller id
+* partner id
+* 后面加密用到的文件(公钥\私钥)
+
+3.去支付宝官网下载支付宝sdk（网页版\无线版）
+1> 生成订单信息
+2> 签名信息
+3> 利用订单信息，签名信息，签名类型生成一个订单字符串
+4> 打开客户端支付
+```
+
+```objc
+- (IBAction)buy {
+    // 1.生成订单信息
+    // 订单信息 == order == [order description]
+    AlixPayOrder *order = [[AlixPayOrder alloc] init];
+    order.productName = self.deal.title;
+    order.productDescription = self.deal.desc;
+    order.partner = PartnerID;
+    order.seller = SellerID;
+    order.amount = [self.deal.current_price description];
+    // 2.签名加密
+    id<DataSigner> signer = CreateRSADataSigner(PartnerPrivKey);
+    // 签名信息 == signedString
+    NSString *signedString = [signer signString:[order description]];
+
+    // 3.利用订单信息、签名信息、签名类型生成一个订单字符串
+    NSString *orderString = [NSString stringWithFormat:@"%@&sign=\"%@\"&sign_type=\"%@\"",
+    [order description], signedString, @"RSA"];
+
+    // 4.打开客户端,进行支付(商品名称,商品价格,商户信息)(有seletor，target 是用来处理网页支付的回调)
+    [AlixLibService payOrder:orderString AndScheme:@"tuangou" seletor:@selector(getResult:) target:self];
+}
+
+// 网页处理结果回调
+- (void)getResult:(NSString *)result{}
+
+// 客户端处理回调
+/** 当从其他应用跳转到当前应用时,就会调用这个方法 */
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    AlixPayResult * result = nil;
+    if (url != nil && [[url host] compare:@"safepay"] == 0) {
+    NSString * query = [[url query] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    #if ! __has_feature(objc_arc)
+        result = [[[AlixPayResult alloc] initWithString:query] autorelease];
+    #else
+        result = [[AlixPayResult alloc] initWithString:query];
+    #endif
+    }
+    if (result.statusCode == 9000) { // 表面上交易成功，但是为了安全，判断是否结果正确
+// 用公钥验证签名 严格验证请使用result.resultString与result.signString验签
+        id<DataVerifier> verifier = CreateRSADataVerifier(AlipayPubKey);
+        if ([verifier verifyString:result.resultString withSign:result.signString]) {
+                //验证签名成功，交易结果无篡改
+                //交易成功
+            } else {
+            // 失败
+            }
+        } else {
+        // 失败
+    }
+    return  YES;
+}
+/*打开Demo 的错误:依赖系统库libcrypto.a libssl.a CG SystemconFiguaration**/
+
+```
+
+```
+美团地图总结
+1. 首先，，iOS8开始 需要用户的授权[self.mgr requestAlwaysAuthorization];并在plist中配置NSLocationAlwaysUsageDescription允许在后台获取GPS的描述
+
+2. 要设置追踪模式，customMapView.userTrackingMode =  MKUserTrackingModeFollow
+
+3. 再mapView 的更新到用户位置的地方，利用反地理编码获取城市名，注意地标placemark的lociaty 和addressdict 中 省级市，和市的取值.获取到城市名，再区域改变的时候哪一个代理方法里面，发送网络请求，获取附近的团购
+
+4. 因为用户刚进入地图的时候也需要知道周边的团购，那么就应该再刚更新到用户位置的代理方法里面主动掉一下代理方法、
+
+5. 获取团购数据插大头针。但是要注意，因为地图每滚动一次就会发一次请求，运行的性能太差，应该用一个bool 常量过滤，如果我正在处理网络请求，那么就不要再发送请求了。
+
+6. 每次滚动都插大头针。如果，我插的大头症的位置存在于现在地图上的大头针，[contains objc]，所以要重写isEquall 方法，告诉系统，只要你的位置和我的大头针样，那么我就认为，这两个大头针相同，我没有必要再在这个地方插大头针了。所以continue ，不插已经有的大头针
+
+7. 如果想改变大头针的图片，只能用父类annotationView。并且一般情况下大头针模型都需要绑定一个团购模型
+```
+
+
+```
+推送
+注意点：APNs限制了每个notification的payload最大长度是256字节，超长的消息是不能发送的
+```
+
+```
+GCD
+> dispatch_once_t必须是全局或static变量
+非全局或非static的dispatch_once_t变量在使用时会导致非常不好排查的bug,正确写法如下
+//静态变量，保证只有一份实例，才能确保只执行一次
+static dispatch_once_t onceToken;
+dispatch_once(&onceToken, ^{
+//单例代码 其实就是保证dispatch_once_t只有一份实例
+});
+
+> 注意，dispatch_after 是延迟提交，并不是延迟运行
+Enqueue，就是入队，指的就是将一个Block在特定的延时以后，加入到指定的队列中，不是在特定的时间后立即运行，dispatch_after只是延时提交block，并不是延时后立即执行。所以想用dispatch_after精确控制运行状态的朋友可要注意了
+> Enqueue，就是入队，指的就是将一个Block在特定的延时以后，加入到指定的队列中，不是在特定的时间后立即运行！
+> 在main线程使用“同步”方法提交Block，必定会死锁。
+```
+
+```
+SEL:其实是对方法的一种包装，将方法包装成一个SEL类型的数据，去找对应的方法地址。找到方法地址就可以调用方法
+方法的存储位置
+> 每个类的方法列表都存储在类对象中
+> 每个方法都有一个与之对应的SEL类型的对象
+> 根据一个SEL对象就可以找到方法的地址，进而调用方法
+> SEL类型的定义
+typedef struct objc_selector *SEL;
+
+```
+
+```
+runtime
+Objective-C 类也是对象，runtime 通过创建 Meta Classes 来处理这些。当你发送一个消息像这样 [NSObject alloc] 你正在向类对象发送一个消息，这个类对象需要是 MetaClass 的实例，MetaClass 也是 root meta class 的实例。当你说继承自 NSObject 时，你的类指向 NSObject 作为自己的 superclass。然而，所有的 meta class 指向 root metaclass 作为自己的 superclass。所有的 meta class 只是简单的有一个自己响应的方法列表。所以当你向一个类对象发送消息如 [NSObject alloc]，然后实际上 objc_msgSend() 会检查 meta class 看看它是否响应这个方法，如果他找到了一个方法，就在这个 Class 对象上执行（译注：class 是一个实例对象的类型，Class 是一个类（class）的类型。对于完全的 OO 来说，类也是个对象，类是类类型(MetaClass)的实例，所以类的类型描述就是 meta class）
+
+* 日志输出
+> __FILE__ ：源代码文件名
+> __LINE__ ：NSLog代码在第几行
+> __func__ ：当前的方法
+> _cmd ：代表着当前方法的SEL
+> - (void)test { //下面的代码会引发死循环
+    [self performSelector:_cmd]
+}
+
+```
+
+```
+通知的安全性用法 
+> 收到通知的对象被称为观察者,而且必须添加到NSNotificationCenter。除非你有很强的理由不去添加到NSNotificationCenter,这样他就总是defaultCenter。在init方法 viewDidLoad方法 viewWillAppear方法里面添加观察者是比较好的选择，你应该尽可能晚地添加观察者和尽快地删除它来提高性能并避免一些不希望出现的bug
+> 如果想让一个控制器的view显示出来的时候才监听，不需要后台监听的时候，那么最严谨的方法是在viewWillAppear 添加通知，viewWillDisAppear 移除通知
+```
+
+
+```
+MVVM 黑魔法
+不要在viewDidLoad里面初始化你的view然后再add，这样代码就很难看。在viewDidload里面只做addSubview的事情，然后在viewWillAppear里面做布局的事情，最后在viewDidAppear里面做Notification的监听之类的事情。至于属性的初始化，则交给getter去做
+
+ViewController基本上是大部分业务的载体
+先是life cycle，然后是Delegate方法实现，然后是event response，然后才是getters and setters
+数据管理者，数据加工者，数据展示者 中Model就是作为数据管理者，View作为数据展示者，Controller作为数据加工者
+M应该做的事：
+给ViewController提供数据
+给ViewController存储数据提供接口
+提供经过抽象的业务基本组件，供Controller调度
+
+C应该做的事：
+管理View Container的生命周期
+负责生成所有的View实例，并放入View Container
+监听来自View与业务有关的事件，通过与Model的合作，来完成对应事件的业务。
+V应该做的事：
+响应与业务无关的事件，并因此引发动画效果，点击反馈（如果合适的话，尽量还是放在View去做）等。
+界面元素表达
+
+MVCS
+苹果自身就采用的是这种架构思路，从名字也能看出，也是基于MVC衍生出来的一套架构。从概念上来说，它拆分的部分是Model部分，拆出来一个Store。这个Store专门负责数据存取。但从实际操作的角度上讲，它拆开的是Controller。
+
+这算是瘦Model的一种方案，瘦Model只是专门用于表达数据，然后存储、数据处理都交给外面的来做。MVCS使用的前提是，它假设了你是瘦 Model，同时数据的存储和处理都在Controller去做。所以对应到MVCS，它在一开始就是拆分的Controller。因为 Controller做了数据存储的事情，就会变得非常庞大，那么就把Controller专门负责存取数据的那部分抽离出来，交给另一个对象去做，这个 对象就是Store。这么调整之后，整个结构也就变成了真正意义上的MVCS。
+
+胖Model包含了部分弱业务逻辑
+胖Model要达到的目的是，Controller从胖Model这里拿到数据之后，不用额外做操作或者只要做非常少的操作，就能够将数据直接应用在View上
+胖Model相对比较难移植，虽然只是包含弱业务，但好歹也是业务
+瘦Model只负责业务数据的表达，所有业务无论强弱一律扔到Controller。瘦Model要达到的目的是，尽一切可能去编写细粒度Model，然后配套各种helper类或方法来对弱业务做抽象，强业务依旧交给Controller
+
+MVVM着重想要解决的问题是尽可能地减少Controller的任务。不管MVVM也好，MVCS也好，他们的共识都是Controller会随着软件的成长，变很大很难维护很难测试
+
+，MVCS是认为Controller做了一部分Model的事情，要把它拆出来变成Store，MVVM是认为Controller做了太多数据加工的事情，所以MVVM把数据加工的任务从Controller中解放了出来，使得Controller只需要专注于数据调配的工作，ViewModel则去负责数据加工并通过通知机制让View响应ViewModel的改变。
+
+MVVM是基于胖Model的架构思路建立的，然后在胖Model中拆出两部分：Model和ViewModel。关于这个观点我要做一个额外解释：胖Model做的事情是先为Controller减负，然后由于Model变胖，再在此基础上拆出ViewModel，跟业界普遍认知的MVVM本质上是为Controller减负这个说法并不矛盾，因为胖Model做的事情也是为Controller减负。
+
+另外，我前面说MVVM把数据加工的任务从Controller中解放出来，跟MVVM拆分的是胖Model也不矛盾。要做到解放Controller，首先你得有个胖Model，然后再把这个胖Model拆成Model和ViewModel。
+
+AOP（Aspect Oriented Programming），面向切片编程，这也是面向XX编程系列术语之一哈，但它跟我们熟知的面向对象编程没什么关系。
+
+什么是切片？(runtime Swizzling 就是通过这个来实现面向切片编程的)
+
+程序要完成一件事情，一定会有一些步骤，1，2，3，4这样。这里分解出来的每一个步骤我们可以认为是一个切片。
+什么是面向切片编程？
+你针对每一个切片的间隙，塞一些代码进去，在程序正常进行1，2，3，4步的间隙可以跑到你塞进去的代码，那么你写这些代码就是面向切片编程。
+
+AOP一般都是需要有一个拦截器，然后在每一个切片运行之前和运行之后（或者任何你希望的地方），通过调用拦截器的方法来把这个jointpoint扔到外面，在外面获得这个jointpoint的时候，执行相应的代码。
+
+在iOS开发领域，objective-C的runtime有提供了一系列的方法，能够让我们拦截到某个方法的调用，来实现拦截器的功能，这种手段我们称为Method Swizzling。Aspects通过这个手段实现了针对某个类和某个实例中方法的拦截
+```
+
+
+```
+*美团总结
+> 元数据工具类
+1、如果项目中一些数据是一成不变的并且比较多，最好的是应该抽取元数据的工具类，你需要什么数据我给你，并且，最好的情况下我只加载一次，没有必要加载多次，最好的办法是static 加载一次
+2. 工具类就应该有工具类的责任，把一些复杂的操作屏蔽再工具类中，比如，你给我一个名字，那么我就返回这个名字的城市模型给你，屏蔽业务细节
+> 数据库工具类(initialize方法里面创建数据库)
+1.将数据库的一些CURD操作屏蔽再内部，不要外界关心
+2.分页小算法。加载哪一页的数据
+int size = 20;
+int pos = (page - 1) * size;
+> 网络请求工具类
+* 本来这里可以用类方法请求数据的，但是，DPRequest 需要有一个代理对象来监听网络请求的过程，返回数据给你，如果用了类方法，那么意味着我不能发请求，因为代理只能由对象来充当，而不能由类担任，所以这地方用对象方法，因为是对象发放，那么最好是一个单例
+* 面向模型开发
+
+> 有的时候，如果再xib中我用autolayout来约束控件，但是这个控件没有尺寸，那么有很大的可能性是系统自带的autoresizing 搞得鬼，这个时候，可以把这个控件的autoresizingMask值none 试一试,防止系统内部的一下拉升操作
+> UICollectionView的一些小坑
+* iOS8的新方法，监听viewWillTransitionToSize 横竖屏的滚动.
+* iPad中cell的间距一般是通过横竖屏的滚动来给以不同的分布，结合布局的flow.sectionInset\minimumLineSpacing等一些属性来调整好看的样子
+* WebView小坑
+> 如果加载的不是你想加载的页面，那么就隐藏webView。这是一个小技巧
+> [webView stringByEvaluatingJavaScriptFromString:js]; // oc与jsp的交互
+> NSString *html = [webView stringByEvaluatingJavaScriptFromString:@"document.getElementsByTagName('html')[0].outerHTML;"]; // 先获取源码，再网页上德源码进行jsp操作更快
+
+> supportedInterfaceOrientations,返回控制器支持的方向,返回的枚举类型要包含mask字眼
+> searchBar做titleView 的问题。默认情况下，searchbar会拉的很长，一直到导航栏的宽度差不多。这个时候外面包装了UIView,以后发现系统自带的不好改变尺寸，可以尝试一下这么搞.
+
+```
+
+```
+自定义输出日志
+#ifdef DEBUG // 处于开发阶段
+#define JNLog(...) NSLog(__VA_ARGS__)
+#else // 处于发布阶段
+#define JNLog(...)
+#endif
+
+fmt输出日志 #define NSString(...) [NSString stringWithFormat:__VA_ARGS__]
+
+```
+
+```
+开发常用宏
+/**判断是真机还是模拟器 */
+#if TARGET_OS_IPHONE
+//iPhone Device
+#endif
+
+#if TARGET_IPHONE_SIMULATOR
+//iPhone Simulator
+#endif
+
+/**使用ARC和不使用ARC */
+#if __has_feature(objc_arc)
+//compiling with ARC
+#else
+// compiling without ARC
+#endif
+
+// 方正黑体简体字体定义
+#define FONT(F) [UIFont fontWithName:@"FZHTJW--GB1-0" size:F]
+//定义一个API
+#define APIURL @"http://xxxxx/" //登陆API #define APILogin [APIURL stringByAppendingString:@"Login"]
+//设置View的tag属性
+#define VIEWWITHTAG(_OBJECT, _TAG) [_OBJECT viewWithTag : _TAG]
+//程序的本地化,引用国际化的文件
+#define MyLocal(x, ...) NSLocalizedString(x, nil)
+//G－C－D
+#define BACK(block) dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block)
+#define MAIN(block) dispatch_async(dispatch_get_main_queue(),block) 
+//NSUserDefaults 实例化
+#define USER_DEFAULT [NSUserDefaults standardUserDefaults] 
+//由角度获取弧度 有弧度获取角度
+#define degreesToRadian(x) (M_PI * (x) / 180.0)
+#define radianToDegrees(radian) (radian*180.0)/(M_PI)
+//读取本地图片
+#define LOADIMAGE(file,ext) [UIImage imageWithContentsOfFile:[[NSBundle mainBundle]pathForResource:file ofType:ext]] 
+//定义UIImage对象
+#define IMAGE(A) [UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:A ofType:nil]]
+```
