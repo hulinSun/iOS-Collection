@@ -1,8 +1,9 @@
 # iOS-Collection
 个人对于iOS的总结
 
+**1. 第一响应者:叫出键盘的叫做第一响应者**
+
 ```
-1. 第一响应者:叫出键盘的叫做第一响应者
 * 辞去第一响应者(退出键盘)：[self.textView resignFirstResponder]
 * 成为第一响应者(交出键盘):  [self.textView becomeFirstResponder]
 * 叫出键盘的另一种方式: - (BOOL)endEditing:(BOOL)force; // 让view 或者view的子控件辞去第一响应者的职务
@@ -12,8 +13,8 @@
 Default implementation affects UIModalPresentationFormSheet visibility.
 ```
 
+**2.UIView 的动画**
 ```
-2. UIView 的动画
 * 首尾式动画:注意，应该在开启动画之后立即设置动画的一些属性(时长，重复次数，代理放动画内部设置能够监听到动画的结束)
 [UIView beginAnimations:(NSString *) context:(void *)]  -> 中间放执行动画的内容 void *(指向任何数据类型) --> id
 [UIView setAnimationDelegate:self]; // 可以监听到动画的开始和动画的结束
@@ -23,12 +24,14 @@ Default implementation affects UIModalPresentationFormSheet visibility.
 [UIView animateWithDuration: animations:<#^(void)animations#> completion:<#^(BOOL finished)completion#>];
 ```
 
+**3.枚举**
 ```
-3. 如果多处代码大部分时相同的，只有在不同情况下那么少数代码不同，考虑抽取出方法出来，相同的代码放在方法中，不同的值当做参数。根据不同的情况需求(枚举类型)来做不同的处理
+如果多处代码大部分时相同的，只有在不同情况下那么少数代码不同，考虑抽取出方法出来，相同的代码放在方法中，不同的值当做参数。根据不同的情况需求(枚举类型)来做不同的处理
 ```
 
+**4.UIView 的属性**
 ```
-4.UIView 的属性 frame bounds center Transfrom
+ frame bounds center Transfrom
 * @property(nonatomic) CGRect frame;
 * 控件所在矩形框在父控件中的位置和尺寸(以父控件的左上角为坐标原点)  可以定义控件的位置(oarigin)和⼤小(size)
 * @property(nonatomic) CGRect bounds;
@@ -51,8 +54,8 @@ self.imgView.transform = CGAffineTransformTranslate(self.imgView.transform, -50,
 
 ```
 
+**5. 标准的枚举写法**
 ```
-5. 标准的枚举写法
 * 枚举类型本质上就是整数，定义的时候，如果只指定了第一个数值，后续的数值会依次递增
 typedef enum {
     kMovingDirTop = 10,
@@ -62,8 +65,8 @@ typedef enum {
 } kMovingDir;
 ```
 
+**6.图片浏览器Demo**
 ```
-图片浏览器Demo
 * 看好plist，plist的根节点是什么就创建什么。
 * KVC字典转模型 [self setValuesForKeysWithDictionary:dict];
 * 懒加载(延迟加载)的好处
@@ -73,8 +76,8 @@ typedef enum {
 懒加载要注意一个清空问题，如果你移除了UI控件，没有清空，但还要重新用重新创建，不清空有可能过不去创建的代码
 ```
 
+**7.帧动画(针对imgView)**
 ```
-帧动画(针对imgView)
 1.最重要的一点是清除缓存
 [self.imgView performSelector:@selector(setAnimationImages:) withObject:nil afterDelay:self.imgView.animationDuration + 1];
 [UIImage imageWithContentsOfFile:] ->用图片在沙盒的路径加载，没有缓存(缓存会经过一些操作后清楚)
@@ -82,8 +85,9 @@ typedef enum {
 2.%02d --> 不够两位补零
 ```
 
+**8.Xcode 路径问题**
 ```
-Xcode 路径问题(iOS8开始 沙盒和bundle位置安装路径改变 :bundle.path打印一下就ok)
+(iOS8开始 沙盒和bundle位置安装路径改变 :bundle.path打印一下就ok)
 1. Xcode6 bundle 路径：/Users/apple/Library/Developer/CoreSimulator/Devices/45A2D2FE-E2F1-40B2-B0C6-679EB21E93CB/data/Containers/Bundle/Application/-----> Bundle
 2. Xcode6 沙盒路径：Users/apple/Library/Developer/CoreSimulator/Devices/45A2D2FE-E2F1-40B2-B0C6-679EB21E93CB/data/Containers/Data/Application -----> Data/Application
 
@@ -103,20 +107,21 @@ find ~/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins -name Info.p
 
 ```
 
+**9.@property 作用**
 ```
-@property 作用
 生成getter方法  生成setter方法
 生成带下划线的成员变量（记录属性内容）
 readonly的属性不会生成带下划线的成员变量！要想访问需要这样写{int _age} 这样访问
 
 ```
 
+**10.@synthesize**
 ```
 @synthesize合成指令，主动指定属性使用的成员变量名称 ->@synthesize image = _image;
 ```
 
+**11.超级猜图Demo**
 ```
-超级猜图Demo
 * 相框效果用按钮：设置contentInset-> background(背景)是白色 -> img 设置图片
 * [self.view bringSubviewToFront:self.imgView]; 把指定的View 放在上面，可见->遮盖的时候用
 * GCD dispatch_after 和 [self performSelector: withObject: afterDelay:];有延迟做一些事情的效果
@@ -138,8 +143,8 @@ arr = [arr sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
 }];
 ```
 
+**12.UIScrollViewDemo**
 ```
-UIScrollViewDemo
 * bounces:弹簧效果 scrollEnabled:能否滚动 show-:是否显示横竖滚动条
 * scrollView的方法很简单，只需要添加scrollView，并且设置contentSize
 * contentOffset:表示UIScrollView滚动的位置, 内容左上角和scrollView左上角的间距
@@ -150,8 +155,8 @@ UIScrollViewDemo
 
 ```
 
+**13.UITableView 多组汽车Demo**
 ```
-UITableView 多组汽车Demo
 *-(NSArray *) sectionIndexTitlesForTableView ->提示标题
 * 嵌套模型数组 :NSDictionary *di in dict[@"cars"] -->dict[@"cars"] 不能用self.cars
 * 滑动删除代理方法: commitEditingStyle 编辑样式
@@ -166,14 +171,15 @@ dequeueReusableCellWithIdentifier可以使用指定的标示符在缓冲池中�
 使用static修饰符可以保证字符串变量只被分配一次内存空间，在此可以与宏的方式进行一下对比
 ```
 
+**14.UIAlertView**
 ```
-UIAlertView
 * alertView.alertViewStyle 弹出样式
 * [alertView textFieldAtIndex:0] 获取文本框样式下的文本框
 * alertView.tag = indexPath.row;在Alert代理方法里用,用alertView.tag记录对应行号的模型,把上面的行数传递给下面
 * 内部有很多私有属性->通过KVC获取
 ```
 
+**15.数据刷新**
 ```
 数据刷新 :永恒的两步走
 * 修改模型数据
@@ -183,8 +189,8 @@ UIAlertView
 
 ```
 
+**16.表格处理**
 ```
-表格处理
 *  NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow]; // 获取选中哪一行的cell
 * 每个tableview都有自己的编辑样式,tableView.editing = YES,就会显示表格编辑界面
 * 实现(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath;
@@ -201,8 +207,8 @@ UIAlertView
 
 ```
 
+**17.自定义cell**
 ```
-自定义cell
 * [self.contentView  addSubview:newView]; 如果想自定义cell，把要添加的view放在contentView中
 * 代码自定义在initWithStyle里面做一些初始化创建，属性设置的操作。尺寸统一在layoutSubviews里面
 * xib自定义在awakeFromNib里面设置
@@ -231,13 +237,13 @@ c. 在控制器中懒加载的时候 statusF.status = status; 尺寸模型就知
 2> 添加类方法，从plist加载直接创建statusFrames的数据数组  +(NSArray *)statusFrames; // 不带参数的类工厂方法
 ```
 
+**18.代理为什么用weak?**
 ```
-代理为什么用weak?
 假设自定义控件CustomView有一个代理属性delegate, 他的代理是控制器，意味着控制器对CustomView 强引用。 如果代理时strong，那么会发生循环引用，CustomView 代理属性强引用控制器,控制器强引用CustomView ，循环引用，造成内存泄露，没法释放控制器和CustomView。
 ```
 
+**19.QQ好友列表**
 ```
-QQ好友列表
 * 模型中 的数组里又存放模型
 > 代码
 -(instancetype)initWithDict:(NSDictionary *)dict; // 好友组:(name online friends(里面装的时好友))
@@ -299,16 +305,16 @@ self.headBtn.imageView.clipsToBounds = NO;   超出控件边框范围的内容�
 /**系统自动调用**/
 ```
 
+**20.runloop**
 ```
-runloop
 * 每个线程都有一个runloop对象.
 * 作用：程序一启动，在主线程中就开启(runloop)消息循环，保证程序的运行
 * runloop 有一个输入源(input source)处理异步消息的,里面有个port的线程接口，用来处理其他线程的消息(performSelector: on thread:)
 * 还有一个Timersource(用来定时接受处理一些主线程的ui事件)处理同步消息的;
 ```
 
+**21.copy**
 ```
-copy
 *堆：由编译器自动分配并释放，一般存放函数的参数值，局部变量等，代码块一过，会自动释放
 *栈：由程序员负责管理,如果程序员不释放，操作系统会自动释放
 * 内存管理
@@ -336,8 +342,8 @@ copy
 > 因为控制器有一个强指针引用这自己的view (self.View) View 有一个属性强引用着(self.subview)子控件数组。所以，当UI控件加入到self.view 的时候，子控件数组就有一个强指针引用这UI控件，所以，控制器没有必要对UI控件强引用，因为有self.subview
 ```
 
+**21.QQTalkDemo**
 ```
-QQTalkDemo
 tableview 小细节
 * self.tableView.separatorStyle =UITableViewCellSeparatorStyleSingleLineEtched;
 * self.tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag; 拖拽tableView就会隐藏键盘
@@ -351,8 +357,8 @@ tableview 小细节
 > UITextField 的leftView 可以设置自定义的view，要想显示，必须要设置leftViewMode
 ```
 
+**22.pickerViewDemo**
 ```
-pickerViewDemo
 * - (void)selectRow:(NSInteger)row inComponent:(NSInteger)component animated:(BOOL)animated
 * numberOfComponentsInPickerView  // 有多少组:
 * numberOfRowsInComponent // 每组有多少航
@@ -361,8 +367,8 @@ pickerViewDemo
 * viewForRow // 自定义View
 ```
 
+**23.autolayout**
 ```
-autolayout
 iPhone4S(3.5英寸)       320 * 480
 iPhone5 5S(4英寸)       320 * 568
 iPhone6(4.7英寸)        375 * 667
@@ -399,8 +405,8 @@ button.right = self.view.width*1 + (-20)
 注意：translateAutoresizingToConstraints这个属性默认是YES，这个属性代表：将视图默认自带的Auto resizing特性是否自动转换为对应的约束。既然使用代码来创建约束，那么就不要让系统自带的转换过来的约束影响添加的自定义约束，所以该属性要设置为NO，为了保证效果，可以将视图以及视图的父视图的该属性都设置为NO
 ```
 
+**24.Xocde6新特性**
 ```
-Xocde6新特性
 * 在新建项目的时候，少了empty空项目的选项
 * 项目里面没有了pch文件，需要自己编写导入(build Setting 里面设置 profiex header->X6Test/profiex header.pch)
 *Xcode6 取消类前缀，因为swift语言有命名空间这一说，类似于java的包。所以取消了类前缀，配置类前缀的方法(工程 - targets --class prefix)
@@ -410,8 +416,9 @@ Xocde6新特性
 * sizeClass 的引入。控制不同状态下，显示不同空间，有着类似revel的效果
 ```
 
+**25.iOS8新特性**
 ```
-iOS8新特性 --->最大的特色是为了统一，安全(隐私的授权)
+最大的特色是为了统一，安全(隐私的授权)
 UIAlertController
 * UIPopoverPresentationController ->一定要先设置second.modalPresentationStyle = UIModalPresentationPopover;在设置sourceView
 * UIPresentationController: 管理所有通过modal 出来的控制器
@@ -453,9 +460,8 @@ autolayout:对屏幕中各种元素进行约束(位置\尺寸)
 
 ```
 
+**25.程序启动原理**
 ```
-程序启动原理
-
 1.执行main函数
 2.执行UIApplicationMain 函数
 * 创建UIApplication对象
@@ -480,8 +486,8 @@ applicationDelegate
 
 ```
 
+**26.控制器的生命周期**
 ```
-控制器的生命周期
 * loadView -> viewWillAppear -> viewDidLoad -> viewDidAppear -> viewWillDisappear ->viewDidDisappear
 -->(收到内存警告) ->didReceiveMemoryWarning ->viewWillUnload ->(销毁view)->viewDidUnload--(如果需要再次显示这个view的时候)-->loadView
 
@@ -504,8 +510,8 @@ applicationDelegate
 > viewDidUnload
 ```
 
+**27.私人通讯录Demo**
 ```
-私人通讯录Demo
 * 监听文本框TextField文字改变的三种方法：代理，通知 [textField addTarget:](UIControlEventEditingChanged)继承UIControl
 * 自动型segue ->自动跳转
 * 手动型segue -> 要判断是否符合条件,然后执行segue (手动型segue必须要设置segue 的标示)
@@ -519,7 +525,7 @@ applicationDelegate
 * 在layoutSubviews里面设置尺寸(在awakeFromNib方法里设置不准确)
 ```
 
-**item**
+***item***
 ```objc
 self.navigationController.navigationBar.barStyle = UIStatusBarStyleDefault;
 // 修改了UIBarButtonItem 文字的颜色 箭头颜色
@@ -529,8 +535,9 @@ self.navigationItem.backBarButtonItem = backItem;
 
 ```
 
+**28.数据存储**
 ```
-数据存储:plist 偏好设置 NSCoding归档
+plist 偏好设置 NSCoding归档
 * plist 文件存储：能存储一些普通对象(字典，数组，NSString，NSNumber等，不能存储自定义对象，比如person)
 >  存 [dict writeToFile:path atomically:YES]; (atomically:原子性操作YES，比较安全，先创建临时文件，直到完全写入才导入)
 >  取  NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
@@ -577,8 +584,8 @@ JNStudent *stu = [NSKeyedUnarchiver unarchiveObjectWithFile:JNStuPath];
 * 数据存储的注意点：只要数据修改(添加，修改，删除)，就要保存数据。 一般配合工具类来一起使用
 ```
 
+**29.Quartz2D**
 ```
-Quartz2D
 * 要用Quartz2D绘图，需要自定义View，在View 的-drawRect方法里面做一些画图操作，drawRect方法系统会默认只调用一次。但是，如果这个自定义View没有尺寸Frame的话,这个方法就不会被调用
 * [self setNeedsDisplay] 重绘
 * 底层基于c语言的api. [UIBezierPath bezierPathWith..] 利用贝塞尔路径封装了一些基本图形的api
@@ -624,9 +631,10 @@ UIImage *newImg = UIGraphicsGetImageFromCurrentImageContext();
 > - (void)renderInContext:(CGContextRef)ctx; 调用某个view的layer的renderInContext:方法即可
 ```
 
+
+**30.事件处理**
 ```
-涂鸦Demo
-* 事件处理知识
+* 
 UIView是UIResponder的子类，可以覆盖下列4个方法处理不同的触摸事件
 一根或者多根手指开始触摸view，系统会自动调用view的下面方法
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -734,8 +742,8 @@ UIEvent还提供了相应的方法可以获得在某个view上面的触摸对象
 
 ```
 
+**31.CALayer**
 ```
-CALayer
 > CALayer负责视图中显示的内容和动画
 > UIView负责监听和响应事件
 > 属性:圆角、边框、阴影及3D形变
@@ -778,8 +786,8 @@ opacity: 淡入淡出动画（改变透明度）
 无论使用哪种方法，都必须向层发送setNeedsDisplay消息，以触发相应绘图方法的调用
 ```
 
+**32.核心动画**
 ```
-核心动画
 * 开发步骤:
 1.初始化一个动画对象(CAAnimation)并设置一些动画相关属性
 2.CALayer中很多属性都可以通过CAAnimation实现动画效果，包括：opacity、position、transform、bounds、contents等（可以在API文档中搜索：CALayer Animatable Properties）
@@ -840,8 +848,9 @@ animations：将改变视图属性的代码放在这个block中
 completion：动画结束后，会自动调用这个block
 ```
 
+
+**33.网易彩票Demo**
 ```
-网易彩票Demo
 1. 类似于QQ那种主流框架，项目的起点都是tabbar控制器，导航控制器，自定义tabbar开始(继承UIView)
 2. 再系统自带的tabbar里面添加自定义的Mytabbar,大师特别注意的是 要在viewWillAppear 方法里面，遍历系统自带的tabbar。 删掉UITabbarButton (继承自UIControl)
 3. 控制器父类的抽取，self继承注意点，子类的各有特色
@@ -869,6 +878,7 @@ completion：动画结束后，会自动调用这个block
 * 小坑：collectionView默认是cell 个数超出了范围才会滚动，但是如果不够，下拉刷新的情况下，设置self.collectionView.alwaysBounceHorizontal = YES 就可以了
 ```
 
+**34.Core Fundation **
 ```
 Core Fundation : 基于c语言的一套框架
 > Core Fundation 中的数据类型一般和Fundation 都是可以互相转换的，这里用到桥接转换(不同框架之间架起一个桥梁,类似于强制类型转换，只不过要加上__bridge 表示不同框架的类型转换)
@@ -898,8 +908,8 @@ NSString *str3 = (__bridge NSString*)str2;
 */
 ```
 
+**35.static 关键字作用**
 ```
-static 关键字作用
 *  static 修饰全局变量
 >  会让这个全局变量只在当前的这个文件中能使用，其他文件不能使用。
 >  举例： 单例static ，只在类的.m 文件中声明，别的文件中不能使用修改我的全局变量,如果不加static，那么别人可以拿到我全局变量修改，这样的话就失去了单例的意义
@@ -910,14 +920,14 @@ static 关键字作用
 >  举例： tableview cell 重用中，修饰了局部的ID 变量，这样保证这个ID 只初始化一次，只有一次内存
 ```
 
+**36.extern关键字**
 ```
-extern关键字
 > extern 是 C/C++语言中表明函数和全局变量作用范围（可见性）的关键字，该关键字告诉编译器，
 其声明的函数和变量可以在本模块或 其它模块中使用。
 ```
 
+**37.图片的加载**
 ```
-图片的加载：
 [UIImage imageNamed:@"home"];  加载png图片
 
 一、非retina屏幕
@@ -950,8 +960,8 @@ extern关键字
 ```
 
 
+**38.创建了一个控件，就是看不见**
 ```
-创建了一个控件，就是看不见
 1.当前控件没有添加到父控件中
 2.当前控件的hidden = YES
 3.当前控件的alpha <= 0.01
@@ -973,8 +983,8 @@ extern关键字
 文本输入框没有在主窗口上：文本输入框的文字无法输入
 ```
 
+**39.父子控制器的问题 **
 ```
-父子控制器的问题 
 * 如果发现：控制器的view还在，但是view上面的数据不显示，极大可能是因为：控制器被提前销毁了
 * 一个控制器的view是可以随意调整尺寸和位置的
 * 一个控制器的view是可以随意添加到其他view中
@@ -984,6 +994,7 @@ extern关键字
 * 规范： 如果两个控制器的互为父子关系，那么，控制器的view 一定要是父子关系，不然父子控制器之间的交互会受很大的影响(监听屏幕旋转等(如果子控制器的view 显示在了父控制器的view上面，那么子控制器就能监听到父控制器的屏幕旋转,没有显示子控制器view的不会通知))
 ```
 
+**40.const**
 ```
 const的用法: 看const 修饰的是什么 
 * const int age = 10; // 表示age只读并且不能修改
@@ -997,8 +1008,8 @@ const的用法: 看const 修饰的是什么
 > 对于类的成员函数，若指定其为 const 类型，则表明其是一个常函数，不能修改类的成员变量；
 ```
 
+**41.lazy init**
 ```
-/** lazy init */
 -(UILabel *)msgLabel
 {
     if (!_msgLabel) {
@@ -1013,8 +1024,8 @@ const的用法: 看const 修饰的是什么
 
 ```
 
+**42.小技巧**
 ```
-小技巧
 1.自定义了leftBarbuttonItem左滑返回手势失效了怎么办?
 self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithImage:img style:UIBarButtonItemStylePlain target:self action:@selector(onBack:)];
 self.navigationController.interactivePopGestureRecognizer.delegate = (id<UIGestureRecognizerDelegate>
@@ -1039,11 +1050,12 @@ _myTableView.separatorInset = UIEdgeInsetsMake(0, 100, 0, 0);
 
 9.CollectionView 怎么实现tableview那种悬停的header?
 CSStickyHeaderFlowLayout
+
+注：参考叶孤城简书tip
 ```
 
+**43.新浪微博项目总结**
 ```
-新浪微博项目总结
-
 1.授权
 > 第一步（利用webView 加载 授权页面）
 *  URL：https://api.weibo.com/oauth2/authorize
@@ -1136,7 +1148,7 @@ dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), 
 
 ```
 
-**弹出菜单的动画**
+**44.弹出菜单的动画**
 ```objc
 -(void)makeOpen
 {
@@ -1181,12 +1193,12 @@ dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), 
 
 ```
 
-
+**45.坐标系转换**
 ```
 坐标系转换： 最重要的是找准坐标系的坐标原点 bounds 是以自己的左上角为原点，自身就是一个坐标系。不用bounds 那么就要有superView
 ```
 
-**拦截代理的setter方法，有代理才做事情**
+**46.拦截代理的setter方法，有代理才做事情**
 ```objc
 - (void)setDelegate:(id<JNEmotionBarDelegate>)delegate
 {
@@ -1197,7 +1209,7 @@ dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), 
 
 ```
 
-**系统的自动渲染**
+**47.系统的自动渲染**
 ```objc
 UIImage *img = [UIImage imageNamed:emotion.png];
 img = [img imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] // 系统会自动渲染成蓝色的，所以不需要渲染，总是保持原生的
@@ -1216,8 +1228,8 @@ self.check.hidden = !self.check.hidden
 * get方法与set方法拦截的选择。 如果重写了get方法，意味着在外面每次获取都会来到get方法。这样保证了数据的实时更新，但是，每次都来都get方法，会怎加一些不必要的开支，而如果进行set方法拦截的话，优势在于不必平凡的调用，只计算一次，但是不能保证实时的一些更新操作
 ```
 
+**48.日期**
 ```
-日期
 > 设置日期格式（声明字符串里面每个数字和单词的含义）
 > E:星期几  M:月份 d:几号(这个月的第几天)  H:24小时制的小时  m:分钟  s:秒  y:年
 > NSLocale *locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
@@ -1230,7 +1242,7 @@ NSDateComponents *cmps =  [calendar components:unit fromDate:creatDate toDate:no
 
 ```
 
-** 通知 后台**
+**49. 通知 后台**
 ```objc
 iOS8开始,对用户的隐私的加强，需要注册配置信息
 if ([[UIDevice currentDevice].systemVersion floatValue] > 8.0 ) { // iOS8
@@ -1269,11 +1281,12 @@ bool 类型和set方法联合使用
  遍历scrollView 内部子控件可以发现，自带了两个view，这两个view 是系统自带的水平垂直滚动条。计算尺寸不方便，所以当对应的属性设置为no 的时候，那么scrollView 的子控件就没有这两个多余的滚动条了
 ```
 
+**50.分页小算法**
 ```
-分页小算法
 NSUInteger count = (emotions.count + JNPageEmotionCount - 1) / JNPageEmotionCount; // JNPageEmotionCount == 20
 ```
 
+**51.touch 事件**
 ```
 有的时候，我们会利用touch 来监听点击，但是这种情况下，点击事件会被子控件吞掉。所以不是太可靠。可以通过长按手势来做到只监听自己的触摸，而不监听子控件的触摸事件
 ```
@@ -1298,8 +1311,9 @@ CGFloat fontWH = self.font.lineHeight; // 字体的行高
 NSAttributedString ,NSTextAttachment 附件对象attach的bounds的xy可以设置。字体的行高 font.lineHeight
 ```
 
+
+**52.性能优化**
 ```
-性能优化
 1. 用ARC管理内存
 2. 在正确的地方使用reuseIdentifier
 3. 尽可能使Views不透明
@@ -1329,8 +1343,8 @@ NSAttributedString ,NSTextAttachment 附件对象attach的bounds的xy可以设�
 25. 尽量避免日期格式转换
 ```
 
+**53.静态库的制作**
 ```
-静态库的制作
 ->static libary ->写一些核心代码-->找到.a 文件，真机模拟器分别build一次->showinFinder -->打包资源(bundle)
 如果没有暴露头文件的解放方法：build pharse ->copy files
 
@@ -1345,7 +1359,7 @@ lipo -create libsim/libJNTool.a libdev/libJNTool.a -output JNXIXI.a
 
 ```
 
-
+**54.正则表达式**
 ```
 *  正则表达式使用步骤
 *  1.创建正则表达式对象：定义规则（正则表达式）(贪婪匹配)
@@ -1367,15 +1381,16 @@ $	匹配字符串的结束
 {n,m}	重复n到m次
 ```
 
+
+**55.缓存逻辑**
 ```
-缓存逻辑
 * 首先从本地缓存加载
 * 本地没有数据再去进入下拉刷新状态   加载服务器端数据
 * 否则不加载服务器数据  只让 用户主动加载数据
 ```
 
+**56.image Mode**
 ```
-image Mode
 > UIViewContentModeScaleToFill : 图片拉伸至填充整个UIImageView（图片可能会变形）
 > UIViewContentModeScaleAspectFit : 图片拉伸至完全显示在UIImageView里面为止（图片不会变形）
 
@@ -1385,8 +1400,8 @@ image Mode
 2.凡是带有Aspect单词的，图片都会保持原来的宽高比，图片不会变形
 ```
 
+**57.性能测试(性能分析，内存分析)**
 ```
-性能测试(性能分析，内存分析)
 1.静态分析(Anaylize)
 * 检测代码是否有潜在的内存泄露
 * 编译器觉得不太合适的代码(32位，64位的适配问题)
@@ -1405,8 +1420,8 @@ image Mode
 c 提供的预处理功能主要有以下三种： 1 ）宏定义　 2 ）文件包含　 3 ）条件编译
 ```
 
+**58.Autoreleasepool的工作原理**
 ```
-Autoreleasepool的工作原理
 Autorelease的对象是在什么时候被release的？
 > autorelease实际上只是把对release的调用延迟了，对于每一个Autorelease，系统只是把该Object放入了当前的Autorelease pool中，当该pool被释放时，该pool中的所有Object会被调用Release。对于每一个Runloop， 系统会隐式创建一个Autorelease pool，这样所有的release pool会构成一个象CallStack一样的一个栈式结构，在每一个Runloop结束时，当前栈顶的Autorelease pool会被销毁，这样这个pool里的每个Object（就是autorelease的对象）会被release。那什么是一个Runloop呢？ 一个UI事件，Timer call， delegate call， 都会是一个新的Runloop。那什么是一个Runloop呢？ 一个UI事件，Timer call， delegate call， 都会是一个新的Runloop。
 
@@ -1414,15 +1429,15 @@ Autorelease的对象是在什么时候被release的？
 > 为了对pool内部的一些局部变量的释放，避免引起内存泄露
 ```
 
+**59.分类的作用 **
 ```
-分类的作用 
 1 可以使本来需要在.h中声明的方法放到.m文件中声明，使方法变成私有。
 2 可以扩展或覆盖一个类的功能，包括系统类，维护了代码原本的结构不受影响。
 3 可以分散代码到不同的文件之中，比如系统类库里有一个NSObject的类别，并没有写在NSObject类里，而写到另外一个类里，主要是因为这个类别扩展的功能跟那个类相关，便于将来查看。(利于团队协作，分模块开发)
 ```
 
+**60.copy **
 ```
-copy */
 * 需要遵守NSCopying的协议，调用copy方法，内部会调用copywithZone 方法
 - (id)copyWithZone:(NSZone *)zone {
     MyObject *copy = [[[self class] allocWithZone: zone] init];
@@ -1433,6 +1448,7 @@ copy */
 > 这种创建对象方式会造成内存地址共享，s1和s2完全指向同一个地址空间，也就是同一个对象了，改变或释放这个地址空间的内容就意味着s1和s2都变了。为了避免修改一方影响到另外一方，字符串赋值时常copy一个新的对象比较安全。
 ```
 
+**61.支付宝**
 ```
 1. 取支付宝官网申请“开通支付宝视同权限”
 * 填写个人信息\公司信息(绝对真实，可靠，不是随便给你用的)
@@ -1508,8 +1524,8 @@ copy */
 
 ```
 
+**63.美团地图总结**
 ```
-美团地图总结
 1. 首先，，iOS8开始 需要用户的授权[self.mgr requestAlwaysAuthorization];并在plist中配置NSLocationAlwaysUsageDescription允许在后台获取GPS的描述
 
 2. 要设置追踪模式，customMapView.userTrackingMode =  MKUserTrackingModeFollow
@@ -1526,13 +1542,13 @@ copy */
 ```
 
 
+**64.推送**
 ```
-推送
 注意点：APNs限制了每个notification的payload最大长度是256字节，超长的消息是不能发送的
 ```
 
+**65.GCD**
 ```
-GCD
 > dispatch_once_t必须是全局或static变量
 非全局或非static的dispatch_once_t变量在使用时会导致非常不好排查的bug,正确写法如下
 //静态变量，保证只有一份实例，才能确保只执行一次
@@ -1558,8 +1574,8 @@ typedef struct objc_selector *SEL;
 
 ```
 
+**66.runtime**
 ```
-runtime
 Objective-C 类也是对象，runtime 通过创建 Meta Classes 来处理这些。当你发送一个消息像这样 [NSObject alloc] 你正在向类对象发送一个消息，这个类对象需要是 MetaClass 的实例，MetaClass 也是 root meta class 的实例。当你说继承自 NSObject 时，你的类指向 NSObject 作为自己的 superclass。然而，所有的 meta class 指向 root metaclass 作为自己的 superclass。所有的 meta class 只是简单的有一个自己响应的方法列表。所以当你向一个类对象发送消息如 [NSObject alloc]，然后实际上 objc_msgSend() 会检查 meta class 看看它是否响应这个方法，如果他找到了一个方法，就在这个 Class 对象上执行（译注：class 是一个实例对象的类型，Class 是一个类（class）的类型。对于完全的 OO 来说，类也是个对象，类是类类型(MetaClass)的实例，所以类的类型描述就是 meta class）
 
 * 日志输出
@@ -1573,15 +1589,15 @@ Objective-C 类也是对象，runtime 通过创建 Meta Classes 来处理这些�
 
 ```
 
-```
-通知的安全性用法 
+**67. 通知的安全性用法**
+``` 
 > 收到通知的对象被称为观察者,而且必须添加到NSNotificationCenter。除非你有很强的理由不去添加到NSNotificationCenter,这样他就总是defaultCenter。在init方法 viewDidLoad方法 viewWillAppear方法里面添加观察者是比较好的选择，你应该尽可能晚地添加观察者和尽快地删除它来提高性能并避免一些不希望出现的bug
 > 如果想让一个控制器的view显示出来的时候才监听，不需要后台监听的时候，那么最严谨的方法是在viewWillAppear 添加通知，viewWillDisAppear 移除通知
 ```
 
 
+**68.MVVM 黑魔法**
 ```
-MVVM 黑魔法
 不要在viewDidLoad里面初始化你的view然后再add，这样代码就很难看。在viewDidload里面只做addSubview的事情，然后在viewWillAppear里面做布局的事情，最后在viewDidAppear里面做Notification的监听之类的事情。至于属性的初始化，则交给getter去做
 
 ViewController基本上是大部分业务的载体
@@ -1631,9 +1647,8 @@ AOP一般都是需要有一个拦截器，然后在每一个切片运行之前�
 在iOS开发领域，objective-C的runtime有提供了一系列的方法，能够让我们拦截到某个方法的调用，来实现拦截器的功能，这种手段我们称为Method Swizzling。Aspects通过这个手段实现了针对某个类和某个实例中方法的拦截
 ```
 
-
+**69.美团总结**
 ```
-*美团总结
 > 元数据工具类
 1、如果项目中一些数据是一成不变的并且比较多，最好的是应该抽取元数据的工具类，你需要什么数据我给你，并且，最好的情况下我只加载一次，没有必要加载多次，最好的办法是static 加载一次
 2. 工具类就应该有工具类的责任，把一些复杂的操作屏蔽再工具类中，比如，你给我一个名字，那么我就返回这个名字的城市模型给你，屏蔽业务细节
@@ -1660,8 +1675,8 @@ int pos = (page - 1) * size;
 
 ```
 
+**70.自定义输出日志**
 ```
-自定义输出日志
 #ifdef DEBUG // 处于开发阶段
 #define JNLog(...) NSLog(__VA_ARGS__)
 #else // 处于发布阶段
@@ -1672,8 +1687,8 @@ fmt输出日志 #define NSString(...) [NSString stringWithFormat:__VA_ARGS__]
 
 ```
 
+**开发常用宏**
 ```
-开发常用宏
 /**判断是真机还是模拟器 */
 #if TARGET_OS_IPHONE
 //iPhone Device
