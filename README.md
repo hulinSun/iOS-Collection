@@ -1726,3 +1726,20 @@ fmt输出日志 #define NSString(...) [NSString stringWithFormat:__VA_ARGS__]
 //定义UIImage对象
 #define IMAGE(A) [UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:A ofType:nil]]
 ```
+
+**71.Tableview 性能优化**
+```
+提前计算并缓存好高度（布局），因为heightForRowAtIndexPath:是调用最频繁的方法；
+异步绘制，遇到复杂界面，遇到性能瓶颈时，可能就是突破口；
+滑动时按需加载，这个在大量图片展示，网络加载的时候很管用！（SDWebImage已经实现异步加载，配合这条性能杠杠的）。
+除了上面最主要的三个方面外，还有很多几乎大伙都很熟知的优化点：
+
+正确使用reuseIdentifier来重用Cells
+尽量使所有的view opaque，包括Cell自身
+尽量少用或不用透明图层
+如果Cell内现实的内容来自web，使用异步加载，缓存请求结果
+减少subviews的数量
+在heightForRowAtIndexPath:中尽量不使用cellForRowAtIndexPath:，如果你需要用到它，只用一次然后缓存结果
+尽量少用addView给Cell动态添加View，可以初始化时就添加，然后通过hide来控制是否显示
+```
+
