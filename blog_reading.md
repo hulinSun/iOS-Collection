@@ -95,5 +95,29 @@ NSDictionary *userInfo = @{
 }
 ```
 
+#####NSString copy strong
+
+**不可变字符串 strong copy 之后都是指向同一份内存地址（做了浅拷贝），但是可变字符串，做的是深拷贝。这时候改变string  strong修饰的字符串也会跟着改变，而深拷贝的对象是新的对象，不会改变，变不变取决于需求，但是一般情况下都不希望别人改变，所以用copy **
+
+```
+ NSString *string = [NSString stringWithFormat:@"abc"];
+    self.strongString = string;
+    self.copyedString = string;
+
+    NSLog(@"origin string: %p, %p", string, &string);
+    NSLog(@"strong string: %p, %p", strongString, &strongString);
+    NSLog(@"copy string: %p, %p", copyedString, &copyedString);
+    
+    origin string: 0x7fe441592e20, 0x7fff57519a48
+strong string: 0x7fe441592e20, 0x7fe44159e1f8
+copy string: 0x7fe441592e20, 0x7fe44159e200
+
+//若果将string 改成mutablestring
+NSMutableString *string = [NSMutableString stringWithFormat:@"abc"];
+
+origin string: 0x7ff5f2e33c90, 0x7fff59937a48
+strong string: 0x7ff5f2e33c90, 0x7ff5f2e2aec8
+copy string: 0x7ff5f2e2aee0, 0x7ff5f2e2aed0
+```
 
 
