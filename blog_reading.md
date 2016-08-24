@@ -431,3 +431,35 @@ JS和OC是通过JavaScriptCore互传消息的。OC端在启动JSPatch引擎时�
 }
 
 ```
+
+#####GCD 信号量
+
+*信号量就是一个资源计数器，对信号量有两个操作来达到互斥，分别是P和V操作。 一般情况是这样进行临界访问或互斥访问的： 设信号量值为1， 当一个进程1运行时，使用资源，进行P操作，即对信号量值减1，也就是资源数少了1个。这是信号量值为0。系统中规定当信号量值为0是，必须等待，直到信号量值不为零才能继续操作。 这时如果进程2想要运行，那么也必须进行P操作，但是此时信号量为0，所以无法减1，即不能P操作，那么久导致了阻塞。这样就达到了进程1排他访问。 当进程1运行结束后，释放资源，进行V操作。资源数重新加1，这是信号量的值变为1. 这时进程2发现资源数不为0，信号量能进行P操作了，立即执行P操作。信号量值又变为0.次数进程2咱有资源，排他访问资源。 这就是信号量来控制互斥的原理*
+
+**简单来讲 信号量为0则阻塞线程，大于0则不会阻塞。则我们通过改变信号量的值，来控制是否阻塞线程，从而达到线程同步**
+
+```
+dispatch_semaphore_create 创建一个semaphore　
+dispatch_semaphore_signal 发送一个信号　
+dispatch_semaphore_wait 等待信号
+```
+**第一个函数有一个整形的参数，我们可以理解为信号的总量，dispatch_semaphore_signal是发送一个信号，自然会让信号总量加1，dispatch_semaphore_wait等待信号，当信号总量少于0的时候就会一直等待，否则就可以正常的执行，并让信号总量-1，根据这样的原理，我们便可以快速的创建一个并发控制来同步任务和有限资源访问控制。**
+
+
+```
+// 创建队列组
+    dispatch_group_t group = dispatch_group_create();   
+// 创建信号量，并且设置值为10
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(10);   
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);   
+    for (int i = 0; i < 100; i++)   
+    {   // 由于是异步执行的，所以每次循环Block里面的dispatch_semaphore_signal根本还没有执行就会执行dispatch_semaphore_wait，从而semaphore-1.当循环10此后，semaphore等于0，则会阻塞线程，直到执行了Block的dispatch_semaphore_signal 才会继续执行
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);   
+        dispatch_group_async(group, queue, ^{   
+            NSLog(@"%i",i);   
+            sleep(2);   
+// 每次发送信号则semaphore会+1，
+            dispatch_semaphore_signal(semaphore);   
+        });   
+    }
+```
