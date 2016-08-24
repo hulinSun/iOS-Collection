@@ -405,3 +405,29 @@ JS和OC是通过JavaScriptCore互传消息的。OC端在启动JSPatch引擎时�
 
 
 ![示意图](/Users/mac/Documents/githup/iOS-Collection/屏幕快照 2016-08-24 下午5.42.00.png)
+
+
+**HOTFIX**
+
+```
+
+- (void)awakeFromObjection
+{
+    /* 基本思路: 安装本地所有补丁 --> 联网更新补丁信息,并安装有更新或新增加的补丁. */
+    /* DEBUG模式,总会执行测试函数,以测试某个JS. */
+    [self mcDebug];
+    
+    /* 安装本地已有补丁. */
+    [self mcInstallLocalPatchs];
+    
+    /* 联网获取最新补丁. */
+    [[[[self mcFetchLatestPatchs] flattenMap:^RACStream *(NSArray<YFPatchModel> * models) {
+        return [self mcUpdateLocalPatchs: models];
+    }] then:^RACSignal *{/* 更新本地补丁文件. */
+        return [self mcUpdateAllLocalPatchFiles];
+    }] subscribeNext:^(id<YFPatchModel> patch) { /* 安装新增或有更新的补丁. */
+        [self mcInstallPatch: patch];
+    }];
+}
+
+```
