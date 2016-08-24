@@ -120,4 +120,208 @@ strong string: 0x7ff5f2e33c90, 0x7ff5f2e2aec8
 copy string: 0x7ff5f2e2aee0, 0x7ff5f2e2aed0
 ```
 
+#####GPUImage
 
+```
+// Base classes
+#import "GPUImageOpenGLESContext.h"
+#import "GPUImageOutput.h"
+#import "GPUImageView.h"
+#import "GPUImageVideoCamera.h"
+#import "GPUImageStillCamera.h"
+#import "GPUImageMovie.h"
+#import "GPUImagePicture.h"
+#import "GPUImageRawDataInput.h"
+#import "GPUImageRawDataOutput.h"
+#import "GPUImageMovieWriter.h"
+#import "GPUImageFilterPipeline.h"
+#import "GPUImageTextureOutput.h"
+#import "GPUImageFilterGroup.h"
+#import "GPUImageTextureInput.h"
+#import "GPUImageUIElement.h"
+#import "GPUImageBuffer.h"
+ 
+// Filters
+#import "GPUImageFilter.h"
+#import "GPUImageTwoInputFilter.h"
+ 
+ 
+#pragma mark - 调整颜色 Handle Color
+ 
+#import "GPUImageBrightnessFilter.h"                //亮度
+#import "GPUImageExposureFilter.h"                  //曝光
+#import "GPUImageContrastFilter.h"                  //对比度
+#import "GPUImageSaturationFilter.h"                //饱和度
+#import "GPUImageGammaFilter.h"                     //伽马线
+#import "GPUImageColorInvertFilter.h"               //反色
+#import "GPUImageSepiaFilter.h"                     //褐色（怀旧）
+#import "GPUImageLevelsFilter.h"                    //色阶
+#import "GPUImageGrayscaleFilter.h"                 //灰度
+#import "GPUImageHistogramFilter.h"                 //色彩直方图，显示在图片上
+#import "GPUImageHistogramGenerator.h"              //色彩直方图
+#import "GPUImageRGBFilter.h"                       //RGB
+#import "GPUImageToneCurveFilter.h"                 //色调曲线
+#import "GPUImageMonochromeFilter.h"                //单色
+#import "GPUImageOpacityFilter.h"                   //不透明度
+#import "GPUImageHighlightShadowFilter.h"           //提亮阴影
+#import "GPUImageFalseColorFilter.h"                //色彩替换（替换亮部和暗部色彩）
+#import "GPUImageHueFilter.h"                       //色度
+#import "GPUImageChromaKeyFilter.h"                 //色度键
+#import "GPUImageWhiteBalanceFilter.h"              //白平横
+#import "GPUImageAverageColor.h"                    //像素平均色值
+#import "GPUImageSolidColorGenerator.h"             //纯色
+#import "GPUImageLuminosity.h"                      //亮度平均
+#import "GPUImageAverageLuminanceThresholdFilter.h" //像素色值亮度平均，图像黑白（有类似漫画效果）
+ 
+#import "GPUImageLookupFilter.h"                    //lookup 色彩调整
+#import "GPUImageAmatorkaFilter.h"                  //Amatorka lookup
+#import "GPUImageMissEtikateFilter.h"               //MissEtikate lookup
+#import "GPUImageSoftEleganceFilter.h"              //SoftElegance lookup
+ 
+ 
+ 
+ 
+#pragma mark - 图像处理 Handle Image
+ 
+#import "GPUImageCrosshairGenerator.h"              //十字
+#import "GPUImageLineGenerator.h"                   //线条
+ 
+#import "GPUImageTransformFilter.h"                 //形状变化
+#import "GPUImageCropFilter.h"                      //剪裁
+#import "GPUImageSharpenFilter.h"                   //锐化
+#import "GPUImageUnsharpMaskFilter.h"               //反遮罩锐化
+ 
+#import "GPUImageFastBlurFilter.h"                  //模糊
+#import "GPUImageGaussianBlurFilter.h"              //高斯模糊
+#import "GPUImageGaussianSelectiveBlurFilter.h"     //高斯模糊，选择部分清晰
+#import "GPUImageBoxBlurFilter.h"                   //盒状模糊
+#import "GPUImageTiltShiftFilter.h"                 //条纹模糊，中间清晰，上下两端模糊
+#import "GPUImageMedianFilter.h"                    //中间值，有种稍微模糊边缘的效果
+#import "GPUImageBilateralFilter.h"                 //双边模糊
+#import "GPUImageErosionFilter.h"                   //侵蚀边缘模糊，变黑白
+#import "GPUImageRGBErosionFilter.h"                //RGB侵蚀边缘模糊，有色彩
+#import "GPUImageDilationFilter.h"                  //扩展边缘模糊，变黑白
+#import "GPUImageRGBDilationFilter.h"               //RGB扩展边缘模糊，有色彩
+#import "GPUImageOpeningFilter.h"                   //黑白色调模糊
+#import "GPUImageRGBOpeningFilter.h"                //彩色模糊
+#import "GPUImageClosingFilter.h"                   //黑白色调模糊，暗色会被提亮
+#import "GPUImageRGBClosingFilter.h"                //彩色模糊，暗色会被提亮
+#import "GPUImageLanczosResamplingFilter.h"         //Lanczos重取样，模糊效果
+#import "GPUImageNonMaximumSuppressionFilter.h"     //非最大抑制，只显示亮度最高的像素，其他为黑
+#import "GPUImageThresholdedNonMaximumSuppressionFilter.h" //与上相比，像素丢失更多
+ 
+#import "GPUImageSobelEdgeDetectionFilter.h"        //Sobel边缘检测算法(白边，黑内容，有点漫画的反色效果)
+#import "GPUImageCannyEdgeDetectionFilter.h"        //Canny边缘检测算法（比上更强烈的黑白对比度）
+#import "GPUImageThresholdEdgeDetectionFilter.h"    //阈值边缘检测（效果与上差别不大）
+#import "GPUImagePrewittEdgeDetectionFilter.h"      //普瑞维特(Prewitt)边缘检测(效果与Sobel差不多，貌似更平滑)
+#import "GPUImageXYDerivativeFilter.h"              //XYDerivative边缘检测，画面以蓝色为主，绿色为边缘，带彩色
+#import "GPUImageHarrisCornerDetectionFilter.h"     //Harris角点检测，会有绿色小十字显示在图片角点处
+#import "GPUImageNobleCornerDetectionFilter.h"      //Noble角点检测，检测点更多
+#import "GPUImageShiTomasiFeatureDetectionFilter.h" //ShiTomasi角点检测，与上差别不大
+#import "GPUImageMotionDetector.h"                  //动作检测
+#import "GPUImageHoughTransformLineDetector.h"      //线条检测
+#import "GPUImageParallelCoordinateLineTransformFilter.h" //平行线检测
+ 
+#import "GPUImageLocalBinaryPatternFilter.h"        //图像黑白化，并有大量噪点
+ 
+#import "GPUImageLowPassFilter.h"                   //用于图像加亮
+#import "GPUImageHighPassFilter.h"                  //图像低于某值时显示为黑
+ 
+ 
+#pragma mark - 视觉效果 Visual Effect
+ 
+#import "GPUImageSketchFilter.h"                    //素描
+#import "GPUImageThresholdSketchFilter.h"           //阀值素描，形成有噪点的素描
+#import "GPUImageToonFilter.h"                      //卡通效果（黑色粗线描边）
+#import "GPUImageSmoothToonFilter.h"                //相比上面的效果更细腻，上面是粗旷的画风
+#import "GPUImageKuwaharaFilter.h"                  //桑原(Kuwahara)滤波,水粉画的模糊效果；处理时间比较长，慎用
+ 
+#import "GPUImageMosaicFilter.h"                    //黑白马赛克
+#import "GPUImagePixellateFilter.h"                 //像素化
+#import "GPUImagePolarPixellateFilter.h"            //同心圆像素化
+#import "GPUImageCrosshatchFilter.h"                //交叉线阴影，形成黑白网状画面
+#import "GPUImageColorPackingFilter.h"              //色彩丢失，模糊（类似监控摄像效果）
+ 
+#import "GPUImageVignetteFilter.h"                  //晕影，形成黑色圆形边缘，突出中间图像的效果
+#import "GPUImageSwirlFilter.h"                     //漩涡，中间形成卷曲的画面
+#import "GPUImageBulgeDistortionFilter.h"           //凸起失真，鱼眼效果
+#import "GPUImagePinchDistortionFilter.h"           //收缩失真，凹面镜
+#import "GPUImageStretchDistortionFilter.h"         //伸展失真，哈哈镜
+#import "GPUImageGlassSphereFilter.h"               //水晶球效果
+#import "GPUImageSphereRefractionFilter.h"          //球形折射，图形倒立
+ 
+#import "GPUImagePosterizeFilter.h"                 //色调分离，形成噪点效果
+#import "GPUImageCGAColorspaceFilter.h"             //CGA色彩滤镜，形成黑、浅蓝、紫色块的画面
+#import "GPUImagePerlinNoiseFilter.h"               //柏林噪点，花边噪点
+#import "GPUImage3x3ConvolutionFilter.h"            //3x3卷积，高亮大色块变黑，加亮边缘、线条等
+#import "GPUImageEmbossFilter.h"                    //浮雕效果，带有点3d的感觉
+#import "GPUImagePolkaDotFilter.h"                  //像素圆点花样
+#import "GPUImageHalftoneFilter.h"                  //点染,图像黑白化，由黑点构成原图的大致图形
+ 
+ 
+#pragma mark - 混合模式 Blend
+ 
+#import "GPUImageMultiplyBlendFilter.h"             //通常用于创建阴影和深度效果
+#import "GPUImageNormalBlendFilter.h"               //正常
+#import "GPUImageAlphaBlendFilter.h"                //透明混合,通常用于在背景上应用前景的透明度
+#import "GPUImageDissolveBlendFilter.h"             //溶解
+#import "GPUImageOverlayBlendFilter.h"              //叠加,通常用于创建阴影效果
+#import "GPUImageDarkenBlendFilter.h"               //加深混合,通常用于重叠类型
+#import "GPUImageLightenBlendFilter.h"              //减淡混合,通常用于重叠类型
+#import "GPUImageSourceOverBlendFilter.h"           //源混合
+#import "GPUImageColorBurnBlendFilter.h"            //色彩加深混合
+#import "GPUImageColorDodgeBlendFilter.h"           //色彩减淡混合
+#import "GPUImageScreenBlendFilter.h"               //屏幕包裹,通常用于创建亮点和镜头眩光
+#import "GPUImageExclusionBlendFilter.h"            //排除混合
+#import "GPUImageDifferenceBlendFilter.h"           //差异混合,通常用于创建更多变动的颜色
+#import "GPUImageSubtractBlendFilter.h"             //差值混合,通常用于创建两个图像之间的动画变暗模糊效果
+#import "GPUImageHardLightBlendFilter.h"            //强光混合,通常用于创建阴影效果
+#import "GPUImageSoftLightBlendFilter.h"            //柔光混合
+#import "GPUImageChromaKeyBlendFilter.h"            //色度键混合
+#import "GPUImageMaskFilter.h"                      //遮罩混合
+#import "GPUImageHazeFilter.h"                      //朦胧加暗
+#import "GPUImageLuminanceThresholdFilter.h"        //亮度阈
+#import "GPUImageAdaptiveThresholdFilter.h"         //自适应阈值
+#import "GPUImageAddBlendFilter.h"                  //通常用于创建两个图像之间的动画变亮模糊效果
+#import "GPUImageDivideBlendFilter.h"               //通常用于创建两个图像之间的动画变暗模糊效果
+ 
+ 
+#pragma mark - 尚不清楚
+#import "GPUImageJFAVoroniFilter.h"
+#import "GPUImageVoroniConsumerFilter.h"
+```
+
+#####JSPatch 执行顺序问题
+
+**JSPatch所有动态替换的函数，都必须在JS执行完了之后，第二次再执行，才会全面以新替换的js代码进行工作。**
+
+*时间顺序*
+
+```
+application:didFinishLaunchingWithOptions:
+JSPatch发起网络请求拉patch
+app的rootViewController触发ViewDidload运行完毕，依然是未修正的错误界面
+JSPatch网络请求拉取回来，执行JS
+JS已经执行成功ViewDidLoad已经被替换，但是界面已经生成，新的正确的ViewDidLoad并不会再次执行
+效果：我的viewDidLoad为啥不能修改啊？
+```
+
+比喻：
+
+viewDidload的函数代码就好比建筑设计图
+运行起来后的界面就好比建好的建筑
+时间顺序：
+
+viewDidLoad有bug需要改（建筑设计图图纸错了）
+旧viewDidLoad先执行，并且创建好了界面（工人已经按着错图纸把建筑建好了）
+JSPatch执行了hotfix（设计师修改设计图纸）
+JSPatch看起来没效果(就算你改好了建筑图纸，已经建好的建筑是不会有任何改变的)
+
+解决办法：2个
+
+* 在建造建筑之前，把图纸改好
+JSPatch在使用的时候，第一次下载网络请求是要时间的，所以才会发生修改图纸，在建筑建好之后。但是补丁已经下载完成，第二次运行app，新的图纸已经存在本地，是可以在创建rootViewController之前，就先把patch运行，让新图纸生效的。
+
+* 不要修改图纸了，直接去修改建筑
+当你网络请求在JSPatch下载完Patch之后，通过callback，进行完全自定义的处理，窗户坏了，直接改窗户，门坏了修门，你也可以自定义把房子推倒了重建,
+如果你使用的是JSPatchSDK，那么头文件有一个callback的API，JSPatchSDK提供了JS下载完成的这个时机，具体怎么修，纯看使用者自己。 如果你是用的是Github源码，那么自己按着这个思路自行处理
