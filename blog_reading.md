@@ -354,3 +354,42 @@ JSPatch在使用的时候，第一次下载网络请求是要时间的，所以�
 * 不要修改图纸了，直接去修改建筑
 当你网络请求在JSPatch下载完Patch之后，通过callback，进行完全自定义的处理，窗户坏了，直接改窗户，门坏了修门，你也可以自定义把房子推倒了重建,
 如果你使用的是JSPatchSDK，那么头文件有一个callback的API，JSPatchSDK提供了JS下载完成的这个时机，具体怎么修，纯看使用者自己。 如果你是用的是Github源码，那么自己按着这个思路自行处理
+
+
+**实现原理 ： JS传递字符串给OC，OC通过 Runtime 接口调用和替换OC方法。**
+ 
+ * Objective-C是动态语言，具有运行时特性，该特性可通过类名称和方法名的字符串获取该类和该方法，并实例化和调用
+ 
+ ```
+ Class class = NSClassFromString(“UIViewController");
+id viewController = [[class alloc] init];  
+SEL selector = NSSelectorFromString(“viewDidLoad");
+[viewController performSelector:selector];
+ ```
+ 
+* 也可以替换某个类的方法为新的实现
+
+```
+static void newViewDidLoad(id slf, SEL sel) {}
+class_replaceMethod(class, selector, newViewDidLoad, @"");
+```
+
+* 互传消息
+
+```
+JS和OC是通过JavaScriptCore互传消息的。OC端在启动JSPatch引擎时会创建一个 JSContext 实例，JSContext 是JS代码的执行环境，可以给 JSContext 添加方法。JS通过调用 JSContext 定义的方法把数据传给OC，OC通过返回值传会给JS。调用这种方法，它的参数/返回值 JavaScriptCore 都会自动转换，OC里的 NSArray, NSDictionary, NSString, NSNumber, NSBlock 会分别转为JS端的数组/对象/字符串/数字/函数类型。
+对于一个自定义id对象，JavaScriptCore 会把这个自定义对象的指针传给JS，这个对象在JS无法使用，但在回传给OC时OC可以找到这个对象。对于这个对象生命周期的管理，如果JS有变量引用时，这个OC对象引用计数就加1 ，JS变量的引用释放了就减1，如果OC上没别的持有者，这个OC对象的生命周期就跟着JS走了，会在JS进行垃圾回收时释放
+```
+
+**方法替换**
+
+<http://blog.cnbang.net/tech/2808/>
+
+* 把UIViewController的 -viewWillAppear: 方法通过 class_replaceMethod() 接口指向 _objc_msgForward，这是一个全局 IMP，OC 调用方法不存在时都会转发到这个 IMP 上，这里直接把方法替换成这个 IMP，这样调用这个方法时就会走到 -forwardInvocation:。
+
+* 为UIViewController添加 -ORIGviewWillAppear: 和 -_JPviewWillAppear: 两个方法，前者指向原来的IMP实现，后者是新的实现，稍后会在这个实现里回调JS函数。
+
+* 改写UIViewController的 -forwardInvocation: 方法为自定义实现。一旦OC里调用 UIViewController 的 -viewWillAppear: 方法，经过上面的处理会把这个调用转发到 -forwardInvocation: ，这时已经组装好了一个 NSInvocation，包含了这个调用的参数。在这里把参数从 NSInvocation 反解出来，带着参数调用上述新增加的方法 -JPviewWillAppear: ，在这个新方法里取到参数传给JS，调用JS的实现函数。整个调用过程就结束了
+
+**Method 保存了一个方法的全部信息，包括SEL方法名，type各参数和返回值类型，IMP该方法具体实现的函数指针。
+**
