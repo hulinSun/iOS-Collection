@@ -291,9 +291,37 @@ copy string: 0x7ff5f2e2aee0, 0x7ff5f2e2aed0
 #import "GPUImageVoroniConsumerFilter.h"
 ```
 
-#####JSPatch 执行顺序问题
+#####JSPatch 
+
+**只需要在项目里引入极小的引擎文件，就可以使用 JavaScript 调用任何 Objective-C 的原生接口，替换任意 Objective-C 原生方法。目前主要用于下发 JS 脚本替换原生 Objective-C 代码，实时修复线上 bug。**
+
+
+**JSPatch 执行顺序问题?**
 
 **JSPatch所有动态替换的函数，都必须在JS执行完了之后，第二次再执行，才会全面以新替换的js代码进行工作。**
+
+JSPatch 会在当前项目的 bundle 里寻找 main.js 文件执行，效果与最终线上用户下载脚本执行一样，测试完后就可以准备上线这个脚本。
+
+注意 +testScriptInBundle 不能与 +startWithAppKey: 一起调用，+testScriptInBundle 只用于本地测试，测试完毕后需要去除。
+
+**HOT FIX**
+上传新的js脚本可以直接全量下发，也可以选择 开发预览 或 灰度或条件下发，也可以使用自定义 RSA key 对脚本进行加密签名。
+
+上传完成后，对应版本的 APP 会请求下载这个脚本保存在本地，以后每次启动都会执行这个脚本。至此线上 bug 修复完成。
+
+**一般的补丁信息**
+
+```
+
+@interface YFPatchModel : MTLModel<YFPatchModel>
+@property (copy, nonatomic) NSString * patchId; //!< 补丁id.用于唯一标记一个补丁.因为补丁,后期可能需要更新,删除,添加等操作.
+@property (copy, nonatomic) NSString * md5; //!< 文件的md5值,用于校验.
+@property (copy, nonatomic) NSString * url; //!< 文件的URL路径.
+@property (copy, nonatomic) NSString * ver; //!< 补丁对应的APP版本.不需要服务器返回,但需要本地存储此值.这个值在涉及到多个版本的补丁共存时,在应用升级时会很有价值.
+@property (assign, nonatomic) YFPatchModelStatus status; //!< 补丁状态.此状态值由本地管理和维护.
+
+@end
+```
 
 *时间顺序*
 
@@ -305,6 +333,7 @@ JSPatch网络请求拉取回来，执行JS
 JS已经执行成功ViewDidLoad已经被替换，但是界面已经生成，新的正确的ViewDidLoad并不会再次执行
 效果：我的viewDidLoad为啥不能修改啊？
 ```
+
 
 比喻：
 
