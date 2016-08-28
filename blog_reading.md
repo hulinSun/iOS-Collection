@@ -467,3 +467,93 @@ dispatch_semaphore_wait 等待信号
 #####Aspects AOP 面相切片编程
 
 **解决复杂的统计问题**
+
+#####iOS 常用小技巧
+
+* 打印View所有子视图
+
+```
+po [[self view]recursiveDescription]
+```
+
+* Cell 的分割线的15像素
+
+```
+首先在viewDidLoad方法加入以下代码：
+ if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.tableView setSeparatorInset:UIEdgeInsetsZero];    
+}   
+ if ([self.tableView respondsToSelector:@selector(setLayoutMargins:)]) {        
+        [self.tableView setLayoutMargins:UIEdgeInsetsZero];
+}
+然后在重写willDisplayCell方法
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell 
+forRowAtIndexPath:(NSIndexPath *)indexPath{   
+    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {       
+             [cell setSeparatorInset:UIEdgeInsetsZero];    
+    }    
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {        
+             [cell setLayoutMargins:UIEdgeInsetsZero];    
+    }
+}
+```
+
+* 方法调用时间
+
+```
+// 获取时间间隔
+#define TICK   CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+#define TOCK   NSLog(@"Time: %f", CFAbsoluteTimeGetCurrent() - start)
+```
+
+* KVC 的数组操作
+
+```
+NSArray *array = [NSArray arrayWithObjects:@"2.0", @"2.3", @"3.0", @"4.0", @"10", nil];
+CGFloat sum = [[array valueForKeyPath:@"@sum.floatValue"] floatValue];
+CGFloat avg = [[array valueForKeyPath:@"@avg.floatValue"] floatValue];
+CGFloat max =[[array valueForKeyPath:@"@max.floatValue"] floatValue];
+CGFloat min =[[array valueForKeyPath:@"@min.floatValue"] floatValue];
+NSLog(@"%fn%fn%fn%f",sum,avg,max,min);
+```
+
+* Nil Null nil NSNull 的区别
+
+```
+* nil是OC的，空对象，地址指向空（0）的对象。对象的字面零值
+* Nil是Objective-C类的字面零值
+* NULL是C的，空地址，地址的数值是0，是个长整数
+* NSNull用于解决向NSArray和NSDictionary等集合中添加空值的问题
+```
+* backItem 返回按钮
+
+```
+[[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -60) forBarMetrics:UIBarMetricsDefault];
+```
+
+* KVC 修改UITextField 中的placeholder 文字颜色
+
+```
+[text setValue:[UIColor redColor] forKeyPath:@"_placeholderLabel.textColor"];
+```
+
+* 让Xcode的控制台支持LLDB类型的打印
+
+```
+打开终端输入三条命令:
+    touch ~/.lldbinit
+    echo display @import UIKit >> ~/.lldbinit
+    echo target stop-hook add -o "target stop-hook disable" >> ~/.lldbinit
+```
+
+* block 判空处理
+
+```
+#define BLOCK_EXEC(block, ...) if (block) { block(__VA_ARGS__); };   
+// 宏定义之前的用法
+ if (completionBlock)   {   
+    completionBlock(arg1, arg2); 
+  }    
+// 宏定义之后的用法
+ BLOCK_EXEC(completionBlock, arg1, arg2);
+```
