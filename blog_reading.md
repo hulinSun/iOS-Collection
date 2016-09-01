@@ -606,3 +606,11 @@ executing 和 finished 属性都被声明成了只读的 readonly 。所以我�
     [self didChangeValueForKey:@"isExecuting"];
 }
 ```
+
+
+#####Dispatch_block
+
+```
+// 用法和一般block 一样，可以用来做没有参数的block 回调
+@property (nonatomic, copy) dispatch_block_t leftBlock;
+```
