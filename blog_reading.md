@@ -652,3 +652,25 @@ executing 和 finished 属性都被声明成了只读的 readonly 。所以我�
 }
 
 ```
+
+#####全屏返回手势
+
+```
+// 将系统自带的手势禁用掉，将系统自带的手势添加到view中，这样就实现了全屏返回手势。 关键在于找准target action 
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    NSLog(@"interactivePopGestureRecognizer = %@ \n\n",self.interactivePopGestureRecognizer);
+    NSLog(@"delegate = %@",self.interactivePopGestureRecognizer.delegate);
+    //获取系统自带滑动手势的target对象
+    id target = self.interactivePopGestureRecognizer.delegate;
+    NSLog(@"target = %@", target);
+    // 创建全屏滑动手势，调用系统自带滑动手势的target的action方法
+    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc]initWithTarget:target action:@selector(handleNavigationTransition:)];
+    //设置代理手势，拦截手势触发
+    pan.delegate = self;
+    //给导航控制器的view添加全屏滑动手势
+    [self.view addGestureRecognizer:pan];
+    // 禁止使用系统自带的滑动手势
+    self.interactivePopGestureRecognizer.enabled = NO;
+}
+```
