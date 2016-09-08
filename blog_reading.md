@@ -764,3 +764,13 @@ self.navigationController?.navigationBar.clipsToBounds = true;
 navigationController?.hidesBarsOnSwipe = true 
     
 ```
+
+##### 关联
+```
+-(NSString *)associatedObject_retain{
+    return objc_getAssociatedObject(self, _cmd);
+}
+- (void)setAssociatedObject_retain:(NSString *)associatedObject_retain{
+    objc_setAssociatedObject(self, @selector(associatedObject_retain), associatedObject_retain, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+```
