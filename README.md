@@ -1728,7 +1728,9 @@ fmt输出日志 #define NSString(...) [NSString stringWithFormat:__VA_ARGS__]
 ```
 
 **71.Tableview 性能优化**
+
 ```
+
 提前计算并缓存好高度（布局），因为heightForRowAtIndexPath:是调用最频繁的方法；
 异步绘制，遇到复杂界面，遇到性能瓶颈时，可能就是突破口；
 滑动时按需加载，这个在大量图片展示，网络加载的时候很管用！（SDWebImage已经实现异步加载，配合这条性能杠杠的）。
@@ -1742,4 +1744,6 @@ fmt输出日志 #define NSString(...) [NSString stringWithFormat:__VA_ARGS__]
 在heightForRowAtIndexPath:中尽量不使用cellForRowAtIndexPath:，如果你需要用到它，只用一次然后缓存结果
 尽量少用addView给Cell动态添加View，可以初始化时就添加，然后通过hide来控制是否显示
 ```
+
+
 

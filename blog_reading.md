@@ -802,3 +802,45 @@ navigationController?.hidesBarsOnSwipe = true
 ```
 
 
+#####视频压缩
+
+```
+使用系统自带的AVAssetExportSession，代码和网上说的差不多
+AVURLAsset *avAsset = [AVURLAsset URLAssetWithURL:sourceUrl options:nil];
+    NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
+    if ([compatiblePresets containsObject:AVAssetExportPresetHighestQuality]){
+        AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:AVAssetExportPresetMediumQuality];
+        NSDateFormatter *formater = [[NSDateFormatter alloc] init];//用时间给文件全名，以免重复，在测试的时候其实可以判断文件是否存在若存在，则删除，重新生成文件即可
+        [formater setDateFormat:@"yyyy-MM-dd-HH:mm:ss"];
+        NSString * resultPath = [NSHomeDirectory() stringByAppendingFormat:@"/Documents/output-%@.mp4", [formater stringFromDate:[NSDate date]]];
+        exportSession.outputURL = [NSURL fileURLWithPath:resultPath];
+        exportSession.outputFileType = AVFileTypeMPEG4;
+        exportSession.shouldOptimizeForNetworkUse = YES;
+        [exportSession exportAsynchronouslyWithCompletionHandler:^(void){
+             switch (exportSession.status) {
+                 case AVAssetExportSessionStatusUnknown:
+                     NSLog(@"AVAssetExportSessionStatusUnknown");
+                     break;
+                 case AVAssetExportSessionStatusWaiting:
+                     NSLog(@"AVAssetExportSessionStatusWaiting");
+                     break;
+                 case AVAssetExportSessionStatusExporting:
+                     NSLog(@"AVAssetExportSessionStatusExporting");
+                     break;
+                 case AVAssetExportSessionStatusCompleted:
+                     NSLog(@"AVAssetExportSessionStatusCompleted");
+                     break;
+                 case AVAssetExportSessionStatusFailed:
+                     NSLog(@"AVAssetExportSessionStatusFailed");
+                     break;
+             }
+         }];
+    }
+```
+
+##### 控制动画执行时间
+
+```
+keyFrameAnimation.beginTime = CACurrentMediaTime() + 0.5
+```
+
