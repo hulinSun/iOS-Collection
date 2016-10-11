@@ -34,11 +34,8 @@ kCFRunLoopExit：即将退出本次Runloop。
 
 ```
 / 这个规则肯定事先跟服务端沟通好，跳转对应的界面需要对应的参数
-NSDictionary *userInfo = @{
-                           @"class":@"HSFeedsViewController",                         @"property": @{@"ID": @"123",                          @"type":@"12"                          }
-};
 
-
+NSDictionary *userInfo = @{@"class":@"HSFeedsViewController",@"property":@{@"ID": @"123",  @"type":@"12"}};
 
 - (void)push:(NSDictionary *)params
 {
@@ -97,7 +94,7 @@ NSDictionary *userInfo = @{
 
 #####NSString copy strong
 
-**不可变字符串 strong copy 之后都是指向同一份内存地址（做了浅拷贝），但是可变字符串，做的是深拷贝。这时候改变string  strong修饰的字符串也会跟着改变，而深拷贝的对象是新的对象，不会改变，变不变取决于需求，但是一般情况下都不希望别人改变，所以用copy **
+**不可变字符串 strong copy 之后都是指向同一份内存地址（做了浅拷贝），但是可变字符串，做的是深拷贝。这时候改变string  strong修饰的字符串也会跟着改变，而深拷贝的对象是新的对象，不会改变，变不变取决于需求，但是一般情况下都不希望别人改变，所以用copy**
 
 ```
  NSString *string = [NSString stringWithFormat:@"abc"];
@@ -517,6 +514,17 @@ CGFloat min =[[array valueForKeyPath:@"@min.floatValue"] floatValue];
 NSLog(@"%fn%fn%fn%f",sum,avg,max,min);
 ```
 
+* 比特操作
+
+```
+ NSArray *products = @[product1,product2,product3];
+    NSLog(@"avg:%@",[products valueForKeyPath:@"@avg.price"]);
+    NSLog(@"count:%@",[products valueForKeyPath:@"@count.price"]);
+    NSLog(@"max:%@",[products valueForKeyPath:@"@max.price"]);
+    NSLog(@"min:%@",[products valueForKeyPath:@"@min.price"]);
+    NSLog(@"sum:%@",[products valueForKeyPath:@"@sum.price"]);
+```
+
 * Nil Null nil NSNull 的区别
 
 ```
@@ -774,3 +782,23 @@ navigationController?.hidesBarsOnSwipe = true
     objc_setAssociatedObject(self, @selector(associatedObject_retain), associatedObject_retain, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 ```
+
+#####keychain
+**可以用NSUserDefaults存储数据信息，但是对于一些私密信息，比如账号、密码等等，就需要使用更为安全的keychain了。而Keychain的信息是存在于每个应用（app）的沙盒之外的，所以keychain里保存的信息不会因App被删除而丢失，在用户重新安装App后依然有效，数据还在。比如优步下载app之后不需要登录，自动登录了**
+[参考链接](http://blog.sina.com.cn/s/blog_5971cdd00102vqgy.html)
+
+#####KVO 注册依赖键
+```
+
+//重写getter方法
+- (NSString *)accountForBank {
+    return [NSString stringWithFormat:@"account for %@ is %d", self.bankCodeEn, self.accountBalance];
+}
+//定义了这种依赖关系后，我们就需要以某种方式告诉KVO，当我们的被依赖属性修改时，会发送accountForBank属性被修改的通知。
+//当两个属性之中的一个改变，就会激发kvo
++ (NSSet *)keyPathsForValuesAffectingAccountForBank {
+    return [NSSet setWithObjects:@"accountBalance", @"bankCodeEn", nil];
+}
+```
+
+
