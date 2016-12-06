@@ -844,3 +844,25 @@ AVURLAsset *avAsset = [AVURLAsset URLAssetWithURL:sourceUrl options:nil];
 keyFrameAnimation.beginTime = CACurrentMediaTime() + 0.5
 ```
 
+#### 屏幕旋转
+
+* 物理方向：[UIDevice currentDevice].orientation (UIDeviceOrientation类型)
+
+```
+if (![UIDevice currentDevice].generatesDeviceOrientationNotifications) {
+        [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+ }
+NSLog(@"%d",[UIDevice currentDevice].orientation);
+[[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+```
+
+* 界面显示方向： viewController.interfaceOrientation
+* [UIApplication sharedApplication].statusBarOrientation
+
+```
+- (BOOL)shouldAutorotate NS_AVAILABLE_IOS(6_0);
+- (NSUInteger)supportedInterfaceOrientations 
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation NS_AVAILABLE_IOS(6_0);
+```
+
+
