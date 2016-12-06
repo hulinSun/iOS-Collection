@@ -865,4 +865,84 @@ NSLog(@"%d",[UIDevice currentDevice].orientation);
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation NS_AVAILABLE_IOS(6_0);
 ```
 
+####AVPLay
+
+```
+- (void)createTimer{
+    __weak typeof(self) weakSelf = self;
+    self.timeObserve = [self.player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(1, 1) queue:nil usingBlock:^(CMTime time){
+        
+        AVPlayerItem *currentItem = weakSelf.playerItem;
+        NSArray *loadedRanges = currentItem.seekableTimeRanges;
+        if (loadedRanges.count > 0 && currentItem.duration.timescale != 0) {
+            // 当前播放时间
+            NSInteger currentTime = (NSInteger)CMTimeGetSeconds([currentItem currentTime]);
+            // 视频总时长
+            CGFloat totalTime     = (CGFloat)currentItem.duration.value / currentItem.duration.timescale;
+            // 播放进度
+            CGFloat value         = CMTimeGetSeconds([currentItem currentTime]) / totalTime;
+            [weakSelf.controlView zf_playerCurrentTime:currentTime totalTime:totalTime sliderValue:value];
+        }
+    }];
+}
+```
+
+```
+
+- (NSTimeInterval)availableDuration {
+    NSArray *loadedTimeRanges = [[_player currentItem] loadedTimeRanges];
+    CMTimeRange timeRange     = [loadedTimeRanges.firstObject CMTimeRangeValue];// 获取缓冲区域
+    float startSeconds        = CMTimeGetSeconds(timeRange.start);
+    float durationSeconds     = CMTimeGetSeconds(timeRange.duration);
+    NSTimeInterval result     = startSeconds + durationSeconds;// 计算缓冲总进度
+    return result;
+}
+```
+
+```
+
+- (void)seekToTime:(NSInteger)dragedSeconds completionHandler:(void (^)(BOOL finished))completionHandler
+{
+    if (self.player.currentItem.status == AVPlayerItemStatusReadyToPlay) {
+        // seekTime:completionHandler:不能精确定位
+        // 如果需要精确定位，可以使用seekToTime:toleranceBefore:toleranceAfter:completionHandler:
+        // 转换成CMTime才能给player来控制播放进度
+        [self.controlView zf_playerActivity:YES];
+        [self.player pause];
+        CMTime dragedCMTime = CMTimeMake(dragedSeconds, 1); //kCMTimeZero
+        __weak typeof(self) weakSelf = self;
+        [self.player seekToTime:dragedCMTime toleranceBefore:CMTimeMake(1,1) toleranceAfter:CMTimeMake(1,1) completionHandler:^(BOOL finished) {
+            [weakSelf.controlView zf_playerActivity:NO];
+            // 视频跳转回调
+            if (completionHandler) { completionHandler(finished); }
+            [weakSelf.player play];
+            weakSelf.seekTime = 0;
+            weakSelf.isDragged = NO;
+            // 结束滑动
+            [weakSelf.controlView zf_playerDraggedEnd];
+            if (!weakSelf.playerItem.isPlaybackLikelyToKeepUp && !weakSelf.isLocalVideo) { weakSelf.state = ZFPlayerStateBuffering; }
+            
+        }];
+    }
+}
+
+```
+
+```
+
+    if (playerItem) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayDidEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:playerItem];
+        [playerItem addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
+        [playerItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
+        // 缓冲区空了，需要等待数据
+        [playerItem addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
+        // 缓冲区有足够数据可以播放了
+        [playerItem addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew context:nil];
+    }
+    
+```
+
+```
+       [self.imageGenerator generateCGImagesAsynchronouslyForTimes:[NSArray arrayWithObject:[NSValue valueWithCMTime:dragedCMTime]] completionHandler:handler];
+```
 
