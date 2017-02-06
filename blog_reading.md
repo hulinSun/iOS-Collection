@@ -978,3 +978,15 @@ static inline NSString * NSStringFromJMRadius(JMRadius radius) {
 
 
 
+#### 运行时判断类型
+ 在Swift中，如果想在运行时判断一个对象的类型是不是可选类型，则可以使用Mirror，所有的可选类型都将返回optional。
+
+Mirror的displayStyle属性的类型是Mirror.DisplayStyle，这是一个枚举类型，用于为Mirror的主体对象提供一种建议性的解析。枚举值范围之外的类型，其Mirror的displayStyle属性将返回nil
+
+```
+let value: Int? = 3
+Mirror(reflecting: value as Any).displayStyle
+/** 如果不是`struct` `class` `enum` tuple optional
+ collection dictionary set 这些类型,那么返回nil */
+```
+
