@@ -990,3 +990,8 @@ Mirror(reflecting: value as Any).displayStyle
  collection dictionary set 这些类型,那么返回nil */
 ```
 
+#### 自定义操作符
+在自定义操作符时，可以以dot(.)开头，这种情况下，操作符后面还可以包含其它的dot(.)
+
+但如果操作符不是以dot开头，则后面不能再包含dot，如&quot;operator +.+&quot;这个声明会被看成是&quot;+&quot;操作符后面跟了个&quot;.+&quot;操作符。编译器会给出错误提示。
+
