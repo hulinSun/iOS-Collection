@@ -997,3 +997,22 @@ Mirror(reflecting: value as Any).displayStyle
 
 *首先在全局使用operator关键字来声明操作符，同时用prefix、infix或postfix来声明操作符的位置；然后在所需要的类/结构体中实现操作符。*
 
+#### selector 玩法
+
+```
+
+fileprivate extension Selector{
+    /// 这里给统一的注释也ok
+    static let loginButtonTaped = #selector(ViewController.buttonTap)
+}
+
+class ViewController: UIViewController{
+    func buttonTap(){ }
+    
+    func setup()  {
+        let btn = UIButton()
+        btn.addTarget(self, action: .loginButtonTaped, for: .touchUpInside)
+    }
+}
+```
+
