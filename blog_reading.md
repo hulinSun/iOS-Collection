@@ -995,3 +995,5 @@ Mirror(reflecting: value as Any).displayStyle
 
 但如果操作符不是以dot开头，则后面不能再包含dot，如&quot;operator +.+&quot;这个声明会被看成是&quot;+&quot;操作符后面跟了个&quot;.+&quot;操作符。编译器会给出错误提示。
 
+*首先在全局使用operator关键字来声明操作符，同时用prefix、infix或postfix来声明操作符的位置；然后在所需要的类/结构体中实现操作符。*
+
