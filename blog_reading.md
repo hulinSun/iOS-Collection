@@ -1016,3 +1016,69 @@ class ViewController: UIViewController{
 }
 ```
 
+
+#### 指针
+
+可以使用withUnsafePointer(to:_:)函数来获取一个变量的指针
+
+withUnsafePointer(to:_:)将第一个参数转换为指针，然后将这个指针作为参数去调用第二个参数指定的闭包。如果闭包有返回值，它将作为函数的返回值。
+
+需要注意的是，生成的指针的生命周期限定于闭包内部，不能将其指定给外部的变量。
+
+```
+
+var age = 5
+withUnsafePointer(to: &age) {p in print(p)}
+
+func printPoint<T>(ptr: UnsafePointer<T>){
+    print(ptr)
+}
+printPoint(ptr: &age)
+```
+
+#### HTTPS
+适配HTTPS做双向验证时，如何放置证书？有两种方式，AFNetworking支持拖拽文件，自动检测并绑定，这个很好用，所以这种方式大家用的多。还有另外一种方式，可以将证书文件转成base64，再用NSURLProtocol缓存起来。原生的NSURLSession支持该方式，当然，AFNetworking也支持该方式。所有如果你看到一个项目，发现项目中没有cer文件，也不一定说
+明该项目不支持双向认证
+
+ HTTPS 请求做 SSL Pinning，即在客户端本地钉一个服务端的证书，在 SSL 握手阶段除了校验证书的有效性和合法性之外，还对服务端返回证书内容与本地的进行比对，只有相同才通过校验，这样可以阻止中间人攻击，以及避免数据被抓包监听。
+ 
+####defer
+
+关键字 defer 允许我们推迟到函数返回之前（或任意位置执行 return 语句之后）一刻才执行某个语句或函数（为什么要在返回之后才执行这些语句？因为 return 语句同样可以包含一些操作，而不是单纯地返回某个值）。当有多个 defer 行为被注册时，它们会以逆序执行（类似栈，即后进先出
+关键字 defer 的用法类似于面向对象编程语言 Java 和 C# 的 finally 语句块，它一般用于释放某些已分配的资源
+
+####static class
+static和class这两个关键字都可以修饰类的方法，以表明这个方法是一个类方法。不过这两者稍微有一些区别：class修饰的类方法可以被子类重写，而static修饰的类方法则不能
+
+#### contains
+Swift中如果想判断一个Array中是否包含某个元素，我们可以使用contains方法
+
+不过这个方法要求数组中的元素类型实现了Equatable协议，否则无法使用，还好Swift为我们提供了另一个contains方法，可以自定义谓词条件作为判断依据
+
+这个方法会查看数组是否包含满足给定的谓词条件的元素。可以看到这个方法是一个高阶函数，其参数是一个尾随闭包，在闭包内我们可以根据实际需要来实现我们自己的判断。所以上面的判断可以如图3实现。
+
+当然，对于元素类型实现了Equatable协议的数组，也可以使用这个方法。可以自定义谓词条件，查看数组是否有满足此条件的元素
+ 
+ ```
+struct Person: Equatable{
+    let age = 20
+    var name: String
+    
+    public static func ==(lhs: Person, rhs: Person) -> Bool{
+        return lhs.name == rhs.name
+    }
+}
+
+let arr = [1,2,3,4,5,6]
+arr.contains(3)
+
+let p1 = Person(name: "jack")
+let p2 = Person(name: "rose")
+let arr1 = [p1,p2]
+arr1.contains { (p) -> Bool in
+    return p.name == "jack"
+}
+arr1.contains(p1)
+p1 == p2 // 实现了equalable 协议，就能使用== 判等
+ ```
+
