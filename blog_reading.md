@@ -1081,4 +1081,22 @@ arr1.contains { (p) -> Bool in
 arr1.contains(p1)
 p1 == p2 // 实现了equalable 协议，就能使用== 判等
  ```
+ 
+#### 截屏通知
+ UIApplicationUserDidTakeScreenshot通知来告诉App用户做了截屏操作，如图1代码所示(Swift+Xcode 8)。我们只需要监听这个通知，并执行想要的操作即可
+ 
+#### static
+在Swift中，如果我们希望懒加载一个对象的属性，则可以在类/结构体中给属性加上lazy修饰符。
+
+而全局变量或常量是自带lazy特性的，它们总是在用到的时候才去初始化，而这种情况下不需要用lazy来修饰。另外存储型类属性也是在初次使用时才初始化，并确保只会初始化一次，不需要用lazy来修饰。如果用lazy去修饰它，则编译器会报错
+
+#### 倒序遍历
+
+```
+let nsarr: NSArray = [1,2,3,4,5,6,7,8]
+nsarr.enumerateObjects(options: .reverse) { (item, idx, stop) in
+    print(item)
+    if idx == 2{ stop.pointee = true }
+}
+```
 
