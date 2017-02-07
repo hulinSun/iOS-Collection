@@ -1100,3 +1100,33 @@ nsarr.enumerateObjects(options: .reverse) { (item, idx, stop) in
 }
 ```
 
+#### oc 类属性
+```
+@interface JNDataTool ()
+@property (class,nonatomic, strong) NSMutableArray *arrs;
+@end
+
+@implementation JNDataTool
+
+static NSMutableArray *_arr = nil;
+
++(NSMutableArray *)arrs{
+    if (_arr == nil) {
+        _arr = [NSMutableArray array];
+    }
+    return _arr;
+}
+
++(void)setArrs:(NSMutableArray *)arrs{
+    if (arrs != _arr) {
+        _arr = arrs;
+    }
+}
+@end
+
+void test(){
+    NSLog(@"%@--",JNDataTool.arrs);
+}
+
+```
+
