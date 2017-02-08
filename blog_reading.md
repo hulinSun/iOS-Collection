@@ -10,6 +10,50 @@ git merge upstream/master
 fork 关联元地址  
 ```
 
+需求：B要加入A的项目，不论是作为B的初始项目进行二次开发还是成为A项目的一员加入一起开发，步骤如下：
+
+1.B首先要fork一个。
+B首先到A的github上，也就是此项目的位置:https://github.com/A/durit，然后单击fork，然后你（B）的github上就出现了一个fork，位置是：https://github.com/B/durit
+
+2.B把自己的fork克隆到本地。
+$ git clone https://github.com/B/durit
+(当你clone到本地，会有一个默认的远程名叫"origin"，它指向了fork on github，也就是B上的fork，而不是指向A)
+
+3.现在你是主人，为了保持与A的durit的联系，你需要给A的durit起个名，供你来驱使。
+$ cd durit
+$ git remote add upstream https://github.com/A/durit
+(现在改名为upstream，这名随意，现在你（B）管A的durit叫upstream，以后B就用upstream来和A的durit联系了)
+
+4.获取A上的更新(但不会修改你的文件)。
+$ git fetch upstream
+（这不，现在B就用upstream来联系A了）
+
+5.合并拉取的数据
+$ git merge upstream/master
+（又联系了一次，upstream/master，前者是你要合并的数据，后者是你要合并到的数据（在这里就是B本地的durit了））
+
+6.在B修改了本地部分内容后，把本地的更改推送到B的远程github上。
+$ git add 修改过的文件
+$ git commit -m "注释"
+$ git push origin master
+（目前为止，B上的github就跟新了）
+
+7.然后B还想让修改过的内容也推送到A上，这就要发起pull request了。
+ 打开B的github,也就是https://github.com/B/durit
+ 点击Pull Requests
+ 单击new pull request
+ 单击create pull request
+ 输入title和你更改的内容
+ 然后单击send pull request
+ 这样B就完成了工作，然后就等着主人A来操作了。
+
+8.在B想要更新A的github上到内容时，结果冲突，因为B和A同时修改了文件，比如说是README.ME，该这样做：
+$ git status(查看冲突文件)
+找到冲突文件(README.MD)后，打开并修改，解决冲突后
+$ git add README.MD
+$ git commit -m "解决了冲突文件README.MD"
+现在冲突解决了，可以更新A的内容了，也就是上面第4步和第5步
+
 ##### 异步渲染
 
 ```
