@@ -1218,3 +1218,21 @@ Selector是Objective-C的产物，它用于在运行时作为一个键值去找�
 2. 并行是多个处理器或多核下执行多个任务，这些任务可以同时执行，即同一时间点可以有多个不同的任务在执行。这些任务在物理上是同时执行的。
 
 
+#### 闭包捕获
+
+```
+
+var thing = "cars"
+//let closure = { [thing] in // 注意，这里是捕获列表
+//    print("I love \(thing)") // cars
+//}
+let closure = {
+    print(thing) // aieplanes
+}
+thing = "airplanes"
+closure()
+
+```
+当声明闭包的时候，捕获列表会创建一份thing的copy，所以被捕获到的值是不会改变的，即使你改变thing的值。
+如果你去掉闭包中的捕获列表，编译器会使用引用代替copy。在这种情况下，当闭包被调用时，变量的值是可以改变的。
+
