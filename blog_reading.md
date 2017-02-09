@@ -1178,3 +1178,33 @@ void test(){
 
 **苹果为了减轻我们的工作量，专门提供了两个宏：NS_ASSUME_NONNULL_BEGIN和NS_ASSUME_NONNULL_END。在这两个宏之间的代码，所有简单指针对象都被假定为nonnull，因此我们只需要去指定那些nullable的指针。**
 
+#### swift options 
+Swift不支持C语言中枚举值的整型掩码操作的技巧。在Swift中，一个枚举可以表示一组有效选项的集合，但却没有办法支持这些选项的组合操作(“&”、”|”等)。理论上，一个枚举可以定义选项值的任意组合值，但对于n > 3这种操作，却无法有效的支持。
+
+为了支持类NS_OPTIONS的枚举，Swift 2.0中定义了OptionSetType协议
+OptionSetType是选项集合类型，它定义了一些基本操作，包括集合操作(union, intersect, exclusiveOr)、成员管理(contains, insert, remove)、位操作(unionInPlace, intersectInPlace, exclusiveOrInPlace)以及其它的一些基本操作
+
+```
+struct Directions: OptionSetType {
+    var rawValue:Int
+    init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+    static let Up: Directions = Directions(rawValue: 1 << 0)
+    static let Down: Directions = Directions(rawValue: 1 << 1)
+    static let Left: Directions = Directions(rawValue: 1 << 2)
+    static let Right: Directions = Directions(rawValue: 1 << 3)
+}
+let leftUp: Directions = [Directions.Left, Directions.Up]
+if leftUp.contains(Directions.Left) && leftUp.contains(Directions.Up) {
+    // ...
+}
+```
+
+#### selector
+
+Selector是Objective-C的产物，它用于在运行时作为一个键值去找到对应方法的实现
+这就要求selector引用的方法必须对ObjC运行时是可见的。而Swift是静态语言，虽然继承自NSObject的类默认对ObjC运行时是可见的，但如果方法是由private关键字修饰的，则方法默认情况下对ObjC运行时并不是可见的，所以就导致了以上的异常：运行时并没找到SwipeCardView类的beginDragged:方法。
+我们必须将private修饰的方法暴露给运行时。正确的做法是在 private 前面加上 @objc 关键字，
+另外需要注意的是，如果我们的类是纯Swift类，而不是继承自NSObject，则不管方法是private还是internal或public，如果要用在Selector中，都需要加上@objc修饰符。
+
