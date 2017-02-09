@@ -1236,3 +1236,15 @@ closure()
 当声明闭包的时候，捕获列表会创建一份thing的copy，所以被捕获到的值是不会改变的，即使你改变thing的值。
 如果你去掉闭包中的捕获列表，编译器会使用引用代替copy。在这种情况下，当闭包被调用时，变量的值是可以改变的。
 
+#### IBDesign 
+IB_DESIGNABLE的宏的功能就是让XCode动态渲染出该类图形化界面。UIView 或 NSView使用IB_DESIGNABLE宏声明时候，就是让Interface Builder知道它应该在UIStoryboard或者Xib中画布上直接渲染视图，不需要等到编译运行后就能预先展示出来效果 。
+IBInspectable修饰属性，可以是用户自定义的运行时属性，让支持KVC的属性能够在Attribute Inspector中配置。
+
+```
+IB_DESIGNABLE
+@interface IBDesignableImageView : UIImageView
+@property(nonatomic,assign) IBInspectable CGFloat cornerRadius;
+
+```
+
+
