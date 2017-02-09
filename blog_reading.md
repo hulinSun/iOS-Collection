@@ -12,7 +12,7 @@ fork 关联元地址
 
 需求：B要加入A的项目，不论是作为B的初始项目进行二次开发还是成为A项目的一员加入一起开发，步骤如下：
 
-1.B首先要fork一个。
+1.B首先要fork一个。'
 B首先到A的github上，也就是此项目的位置:https://github.com/A/durit，然后单击fork，然后你（B）的github上就出现了一个fork，位置是：https://github.com/B/durit
 
 2.B把自己的fork克隆到本地。
@@ -1173,4 +1173,8 @@ void test(){
 }
 
 ```
+
+####xcode 6.3 兼容swift
+
+**苹果为了减轻我们的工作量，专门提供了两个宏：NS_ASSUME_NONNULL_BEGIN和NS_ASSUME_NONNULL_END。在这两个宏之间的代码，所有简单指针对象都被假定为nonnull，因此我们只需要去指定那些nullable的指针。**
 
