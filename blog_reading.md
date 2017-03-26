@@ -1398,7 +1398,8 @@ Implementation(typedef id (*IMP)(id, SEL, ...))：这是一个指针类型，指
 常驻线程。要想runloop一直不退出，那么给他事情做就可以。可以给timer source 那么runloop就会一直工作。所以这就是常驻线程的背后原理 [runloop addport] 本质上就给添加source、那么线程就可以一直在了。达到了场主线程的目的
 
 
-
+### super 
+特别注意，super 不是一个指针。self 是一个指针，super 只是编译指示器，就是给编译器看的，只要编译器看到super 这个标志，就会让当前对象调用父类的方法。 本质上还是self 调用的方法， 所以[super class] 返回的还是当前对象的类型
 
 
 
